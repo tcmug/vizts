@@ -1,7 +1,6 @@
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 
 const publicPath    = "";
 const distPath      = path.resolve(__dirname, 'dist') + "/";
@@ -26,8 +25,7 @@ module.exports = {
             filename: './index.html',
             inject: true,
             template: indexTemplate
-        }),
-        new HtmlWebpackHarddiskPlugin()
+        })
     ],
     module: {
         loaders: [
