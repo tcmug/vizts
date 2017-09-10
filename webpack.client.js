@@ -1,6 +1,7 @@
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const SassPlugin = require('sass-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const publicPath    = "";
@@ -34,8 +35,8 @@ const client = {
             filename: './index.html',
             inject: true,
             template: indexTemplate
-        })
-        //new UglifyJSPlugin()
+        }),
+        //new SassPlugin('./src/client/style/main.sass')
     ],
     module: {
         loaders: [
@@ -47,9 +48,14 @@ const client = {
             {
                 test: require.resolve('snapsvg'),
                 loader: 'imports-loader?this=>window,fix=>module.exports=0'
+            },
+            {
+              test: /\.sass$/,
+              loaders: ["style-loader","css-loader","sass-loader"]
             }
         ]
     }
+
 };
 
 module.exports = client;

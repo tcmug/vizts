@@ -1,30 +1,33 @@
 
 import {h, Component} from 'preact';
 import Paper from './Paper';
-import * as io from 'socket.io-client';
+import Client from './Client';
 
 export interface MainProps {
 }
 
-export default class Main extends Component<MainProps, any> {
+interface MainState {
+    snap: any
+}
 
-    socket: any;
+export default class Main extends Component<MainProps, MainState> {
 
     constructor(props) {
         super(props);
-        this.socket = io();
     }
 
-    callMe(paper) {
-        paper.circle(15, 15, 10)
-          .attr({
-            fill: "#bada55",
-            stroke: "#000",
-            strokeWidth: 5
-          });
+    componentDidMount() {
+        let client = new Client({
+            name: "User" + Math.random(),
+            id: '',
+        }, this.state.snap);
     }
 
-    render (props) {
-        return <Paper id="World" init={ this.callMe }/>
+    init = (snap: any) => {
+        this.setState({ snap: snap });
+    }
+
+    render(props) {
+        return <Paper id="World" init={ this.init }/>
     }
 }

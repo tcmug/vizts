@@ -2,13 +2,16 @@
 import * as express from "express";
 import * as http from "http";
 import * as socketIo from "socket.io";
+import { ClientProperties, ClientList } from "../shared/ClientProperties";
 
 export class Server {
+
     public static readonly PORT:number = 4040;
     public app: any;
     private server: any;
     private io: any;
     private port: string | number;
+    private clients: ClientList;
 
     constructor() {
         this.createApp();
@@ -16,6 +19,8 @@ export class Server {
         this.createServer();
         this.sockets();
         this.listen();
+        this.clients = [];
+        console.log(this.clients);
     }
 
     private createApp(): void {
@@ -40,15 +45,21 @@ export class Server {
         });
 
         this.io.on('connect', (socket: any) => {
-            console.log('Connected client on port %s.', this.port);
-            // socket.on('message', (m: Message) => {
-            //     console.log('[server](message): %s', JSON.stringify(m));
-            //     this.io.emit('message', m);
-            // });
 
-            // socket.on('disconnect', () => {
-            //     console.log('Client disconnected');
-            // });
+            socket.on('client_join', (m: ClientProperties) => {
+                m.id = socket.id;
+                this.clients = [ ...this.clients, m as ClientProperties ];
+                socket.broadcast.emit('client_join', m);
+                socket.emit('clients_state', this.clients);
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Client disconnected: ' + socket.id);
+                let c = this.clients.filter((c) => c.id == socket.id);
+                this.clients = this.clients.filter((c) => c.id !== socket.id);
+                socket.broadcast.emit('client_leave', c[0]);
+            });
+
         });
     }
 }
