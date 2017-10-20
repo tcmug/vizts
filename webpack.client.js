@@ -46,10 +46,6 @@ const client = {
                 loaders: ['ts-loader']
             },
             {
-                test: require.resolve('snapsvg'),
-                loader: 'imports-loader?this=>window,fix=>module.exports=0'
-            },
-            {
               test: /\.sass$/,
               loaders: ["style-loader","css-loader","sass-loader"]
             }

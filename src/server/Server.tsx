@@ -46,11 +46,23 @@ export class Server {
 
         this.io.on('connect', (socket: any) => {
 
+            console.log('Client connected: ' + socket.id);
+
             socket.on('client_join', (m: ClientProperties) => {
                 m.id = socket.id;
                 this.clients = [ ...this.clients, m as ClientProperties ];
                 socket.broadcast.emit('client_join', m);
                 socket.emit('clients_state', this.clients);
+            });
+
+            socket.on('client_update', (m: any) => {
+                console.log('Client update: ' + socket.id);
+                socket.broadcast.emit('client_update', m);
+            });
+
+            socket.on('action', (m: any) => {
+                console.log('Client action ' + socket.id);
+                socket.broadcast.emit('action', m);
             });
 
             socket.on('disconnect', () => {
