@@ -1,48 +1,77 @@
 
 import * as io from 'socket.io-client';
-import { ClientProperties, ClientList } from "../shared/ClientProperties";
+import { ClientProperties, ClientList } from '../shared/ClientProperties';
+import { Action } from './Action';
+import { ActionMapper } from './MainAction';
 
-export default class Client {
+export interface ClientDef {
+    onJoin: Function,
+    onLeave: Function,
+    onUpdate: Function,
+    onAction: Function
+}
+
+export class Client {
 
     socket: any;
     clientSpecs: any;
     client: ClientProperties;
     clients: ClientList;
-    snap: any;
+    clientDef: ClientDef;
 
-    constructor(props: ClientProperties, snap: any) {
+    log(msg) {
+        console.log(msg);
+    }
 
-        this.client = props;
+    constructor(props: ClientDef) {
+
+        this.clientDef = props;
+        this.client = { id: '' };
         this.clients = [];
         this.socket = io(this.clientSpecs);
-        this.snap = snap;
 
         this.socket.on('connect', () => {
             this.client.id = this.socket.id;
-            console.log("I am " + this.client.id);
+            this.log('I am ' + this.client.id);
             this.socket.emit('client_join', this.client);
         });
 
         this.socket.on('clients_state', (cp: ClientList) => {
-            console.log('State received');
+            this.log('State received for: ' + cp.length);
             this.clients = cp;
-            console.log(this.clients);
+            for (let cp of this.clients) {
+                this.clientDef.onJoin(cp);
+            }
         });
 
         this.socket.on('client_join', (cp: ClientProperties) => {
-            console.log("Client joined " + cp.id);
-            cp.element = 1;
+            this.log('Client joined ' + cp.id);
             this.clients = [ ...this.clients, cp as ClientProperties ];
-            console.log(this.clients);
+            this.clientDef.onJoin(cp);
         });
 
         this.socket.on('client_leave', (cp: ClientProperties) => {
-            console.log("Client left " + cp.id);
-            cp.element = 1;
+            this.log('Client left ' + cp.id);
             this.clients = this.clients.filter((c) => c.id !== cp.id);
-            console.log(this.clients);
+            this.clientDef.onLeave(cp);
         });
 
+        this.socket.on('client_update', (cp: ClientProperties) => {
+            this.log('Client update ' + cp);
+            this.clientDef.onUpdate(cp);
+        });
 
+        this.socket.on('action', (cp: Action) => {
+            this.log('Client action ' + cp);
+            this.clientDef.onAction(ActionMapper(cp));
+        });
+    }
+
+    action = (action: Action) => {
+        this.socket.emit('action', action);
+    }
+
+    update = (update) => {
+        this.socket.emit('client_update', update);
     }
 }

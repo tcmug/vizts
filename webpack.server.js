@@ -23,7 +23,7 @@ const server = { 
         extensions: ['.ts', '.tsx', '.js']
     },
     plugins: [
-        new NodemonPlugin()
+        new NodemonPlugin(),
         //new UglifyJSPlugin()
     ],
     module: {

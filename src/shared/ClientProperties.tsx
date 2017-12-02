@@ -1,9 +1,7 @@
 
 
 export class ClientProperties {
-    name: string;
     id: string;
-    element?: any;
 }
 
 export type ClientList = ClientProperties[];

@@ -37,6 +37,7 @@ const client = {
             template: indexTemplate
         }),
         //new SassPlugin('./src/client/style/main.sass')
+        //new UglifyJSPlugin()
     ],
     module: {
         loaders: [
