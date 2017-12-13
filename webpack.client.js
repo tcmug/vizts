@@ -2,11 +2,13 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const SassPlugin = require('sass-webpack-plugin');
+const FilePlugin = require('file-loader');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const publicPath    = "";
 const distPath      = path.resolve(__dirname, 'dist') + "/client/";
 const indexTemplate = path.resolve(__dirname, 'static') + "/index.html";
+const assetsPath    = path.resolve(__dirname, 'assets') + "/";
 
 const client = {
     devtool: 'source-map',
@@ -51,8 +53,13 @@ const client = {
                 loader: 'imports-loader?this=>window,fix=>module.exports=0'
             },
             {
-              test: /\.sass$/,
-              loaders: ["style-loader","css-loader","sass-loader"]
+                test: /\.sass$/,
+                loaders: ["style-loader","css-loader","sass-loader"]
+            },
+            {
+                test: /\.(jpg|png|svg)$/,
+                loader: "file-loader",
+                include: assetsPath
             }
         ]
     }

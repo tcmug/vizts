@@ -16,11 +16,13 @@ interface MainState {
     client: Client
 }
 
+const lord = require("../../assets/lord.png");
 
 
 export default class Main extends Component<MainProps, MainState> {
 
     playerEntities: EntityList;
+    divElement: any;
 
     constructor(props) {
         super(props);
@@ -37,12 +39,41 @@ export default class Main extends Component<MainProps, MainState> {
 
         this.state.stage = new Konva.Stage({
           container: "#World",
-          width: 300,
-          height: 300
+          width: this.divElement.clientWidth,
+          height: this.divElement.clientHeight
         });
 
         this.state.layer = new Konva.Layer();
+        //this.state.layer.getCanvas().setPixelRatio(1);
+
+        let stage = this.state.layer;
+
+        var imageObj = new Image();
+        imageObj.onload = () => {
+            var yoda = new Konva.Image({
+                x: 50,
+                y: 50,
+                image: imageObj,
+                width: 500,
+                height: 500
+            });
+            stage.add(yoda);
+        }
+        //     imageObj.onerror = function() {
+        //     imageObj.src = 'lord.png';
+        //     //console.log("Error");
+        // }
+        imageObj.src = lord;
+
         this.state.stage.add(this.state.layer);
+
+        let ctx = this.state.layer.getContext()._context;
+        if ('imageSmoothingEnabled' in ctx) {
+           ctx.imageSmoothingEnabled = false;
+        } else {
+           ctx.mozImageSmoothingEnabled = false;
+           ctx.msImageSmoothingEnabled = false;
+        }
 
         this.playerEntities = [];
         this.state.client = new Client(def);
@@ -97,6 +128,6 @@ export default class Main extends Component<MainProps, MainState> {
     }
 
     render(props) {
-        return <div id="World" onClick={ this.onClick }/>
+        return <div ref={ (divElement) => this.divElement = divElement} id="World" onClick={ this.onClick }/>
     }
 }
