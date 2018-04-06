@@ -77,7 +77,8 @@ export default class Main extends Component<MainProps, MainState> {
             let passed = 0;
             let fps = 1000 / 30;
 
-            actors.forEach((a: Actor, index: number) => {a.play('idle');});
+            //actors.forEach((a: Actor, index: number) => {a.play('idle');});
+
             var anim = new Konva.Animation(function(frame) {
                 passed += frame.time - previous;
                 previous = frame.time;
@@ -85,7 +86,7 @@ export default class Main extends Component<MainProps, MainState> {
                     return false;
                 }
                 actors = actors.sort((a: any, b: any) => a.obj.y() - b.obj.y());
-                actors.forEach((a: Actor, index: number) => {a.obj.setZIndex(index);});
+                actors.forEach((a: Actor, index: number) => {a.update(); a.obj.setZIndex(index);});
                 passed -= fps;
                 return true;
             }, self.state.layer);

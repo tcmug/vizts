@@ -24,6 +24,9 @@ export class Actor {
     framesPerRow: number;
 	stage: any;
     interval: any;
+    targetX: number;
+    targetY: number;
+    sequenceName: string;
     activeSequence: Sequence;
     sequences: SequenceMap;
 
@@ -33,7 +36,7 @@ export class Actor {
 
         this.obj = new Konva.Image({
             x: Math.random() * 500,
-            y:  Math.random() * 500,
+            y: Math.random() * 500,
             image: specs.image,
             width: 32,
             height: 32,
@@ -46,23 +49,65 @@ export class Actor {
         this.frameHeight = 8;
         this.frameWidth = 8;
         this.framesPerRow = 4;
+        this.targetX = 0;Math.random() * 500;
+        this.targetY = 0;
 
         this.sequences = {};
         this.sequences["walk-right"] = { start:0, count:4, speed: 400, loop:true } as Sequence;
         this.sequences["walk-left"] = { start:4, count:4, speed: 400, loop:true } as Sequence;
         this.sequences["idle"] = { start:8, count:4, speed: 400, loop:true } as Sequence;
-        this.activeSequence = { start:0, count:0, speed: 1000, loop:true } as Sequence;
+        this.play("idle"); //{ start:0, count:0, speed: 1000, loop:true } as Sequence;
+
+        this.walkTo(Math.random() * 500, Math.random() * 500);
         this._show();
     }
 
     play = (sequence: string) => {
+        if (this.sequenceName == sequence) {
+            return;
+        }
         this.activeSequence = this.sequences[sequence];
         this.frame = this.activeSequence.start;
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+        this.sequenceName = sequence;
         this.interval = setInterval(() => this._update(), this.activeSequence.speed);
     }
 
     stop = () => {
         clearInterval(this.interval);
+        this.interval = null;
+    }
+
+    _distanceToTarget = () => {
+        let x = this.obj.getX() - this.targetX;
+        let y = this.obj.getY() - this.targetY;
+        return Math.sqrt(x * x + y * y);
+    }
+
+    walkTo = (x: number, y: number) => {
+        if (x > this.obj.getX()) {
+            this.play("walk-right");
+        }
+        else {
+            this.play("walk-left");
+        }
+        this.targetX = x;
+        this.targetY = y;
+    }
+
+    update = () => {
+        let distance = this._distanceToTarget();
+        if (distance > 1) {
+            let x = (this.targetX - this.obj.getX()) / distance;
+            let y = (this.targetY - this.obj.getY()) / distance;
+            this.obj.setX(this.obj.getX() + x);
+            this.obj.setY(this.obj.getY() + y);
+        }
+        else {
+            this.play("idle");
+        }
     }
 
     _update() {
