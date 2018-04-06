@@ -6,6 +6,7 @@ import { ClientProperties } from '../shared/ClientProperties';
 import { Action } from './Action';
 import { Entity, EntityList } from './Entity';
 import { ActionMapper, ActionMove } from './MainAction';
+import { Actor } from './Actor';
 
 export interface MainProps {
 }
@@ -16,7 +17,7 @@ interface MainState {
     client: Client
 }
 
-const lord = require("../../assets/lord.png");
+const lord = require("../../assets/onti.png");
 
 
 export default class Main extends Component<MainProps, MainState> {
@@ -30,6 +31,7 @@ export default class Main extends Component<MainProps, MainState> {
 
     componentDidMount() {
         let def: ClientDef;
+
         def = {
           onJoin: this.join,
           onLeave: this.leave,
@@ -44,35 +46,51 @@ export default class Main extends Component<MainProps, MainState> {
         });
 
         this.state.layer = new Konva.Layer();
-        //this.state.layer.getCanvas().setPixelRatio(1);
 
         let stage = this.state.layer;
 
-        var imageObj = new Image();
-        imageObj.onload = () => {
-            var yoda = new Konva.Image({
-                x: 50,
-                y: 50,
-                image: imageObj,
-                width: 500,
-                height: 500
-            });
-            stage.add(yoda);
-        }
-        //     imageObj.onerror = function() {
-        //     imageObj.src = 'lord.png';
-        //     //console.log("Error");
-        // }
-        imageObj.src = lord;
+        let self = this;
 
-        this.state.stage.add(this.state.layer);
+        let imgObj = new Image();
+        imgObj.src = lord;
+        imgObj.onload = () => {
 
-        let ctx = this.state.layer.getContext()._context;
-        if ('imageSmoothingEnabled' in ctx) {
-           ctx.imageSmoothingEnabled = false;
-        } else {
-           ctx.mozImageSmoothingEnabled = false;
-           ctx.msImageSmoothingEnabled = false;
+            let actors = [];
+            let i : number = 0;
+            for (i = 0; i < 10; i++) {
+                let actor = new Actor(this.state.layer, {image: imgObj});
+                actors.push(actor);
+            }
+
+            self.state.stage.add(this.state.layer);
+
+            let ctx = this.state.layer.getContext()._context;
+            if ('imageSmoothingEnabled' in ctx) {
+               ctx.imageSmoothingEnabled = false;
+            } else {
+               ctx.mozImageSmoothingEnabled = false;
+               ctx.msImageSmoothingEnabled = false;
+            }
+
+            let previous = 0;
+            let current = 0;
+            let passed = 0;
+            let fps = 1000 / 30;
+
+            actors.forEach((a: Actor, index: number) => {a.play('idle');});
+            var anim = new Konva.Animation(function(frame) {
+                passed += frame.time - previous;
+                previous = frame.time;
+                if (passed < fps) {
+                    return false;
+                }
+                actors = actors.sort((a: any, b: any) => a.obj.y() - b.obj.y());
+                actors.forEach((a: Actor, index: number) => {a.obj.setZIndex(index);});
+                passed -= fps;
+                return true;
+            }, self.state.layer);
+
+            anim.start();
         }
 
         this.playerEntities = [];
@@ -98,7 +116,6 @@ export default class Main extends Component<MainProps, MainState> {
             })
         }
         this.state.layer.add(e.element);
-        this.state.layer.draw();
         this.playerEntities = [ ...this.playerEntities, e ];
         console.log(this.playerEntities);
     }
