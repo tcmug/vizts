@@ -9,6 +9,7 @@ import { ActionMapper, ActionMove } from './MainAction';
 import { Actor } from './Actor';
 
 export interface MainProps {
+    resources: {},
 }
 
 interface MainState {
@@ -16,8 +17,6 @@ interface MainState {
     layer: any,
     client: Client
 }
-
-const lord = require("../../assets/onti.png");
 
 
 export default class Main extends Component<MainProps, MainState> {
@@ -51,48 +50,43 @@ export default class Main extends Component<MainProps, MainState> {
 
         let self = this;
 
-        let imgObj = new Image();
-        imgObj.src = lord;
-        imgObj.onload = () => {
-
-            let actors = [];
-            let i : number = 0;
-            for (i = 0; i < 10; i++) {
-                let actor = new Actor(this.state.layer, {image: imgObj});
-                actors.push(actor);
-            }
-
-            self.state.stage.add(this.state.layer);
-
-            let ctx = this.state.layer.getContext()._context;
-            if ('imageSmoothingEnabled' in ctx) {
-               ctx.imageSmoothingEnabled = false;
-            } else {
-               ctx.mozImageSmoothingEnabled = false;
-               ctx.msImageSmoothingEnabled = false;
-            }
-
-            let previous = 0;
-            let current = 0;
-            let passed = 0;
-            let fps = 1000 / 30;
-
-            //actors.forEach((a: Actor, index: number) => {a.play('idle');});
-
-            var anim = new Konva.Animation(function(frame) {
-                passed += frame.time - previous;
-                previous = frame.time;
-                if (passed < fps) {
-                    return false;
-                }
-                actors = actors.sort((a: any, b: any) => a.obj.y() - b.obj.y());
-                actors.forEach((a: Actor, index: number) => {a.update(); a.obj.setZIndex(index);});
-                passed -= fps;
-                return true;
-            }, self.state.layer);
-
-            anim.start();
+        let actors = [];
+        let i : number = 0;
+        for (i = 0; i < 10; i++) {
+            let actor = new Actor(this.state.layer, {image: this.props.resources['onti']});
+            actors.push(actor);
         }
+
+        self.state.stage.add(this.state.layer);
+
+        let ctx = this.state.layer.getContext()._context;
+        if ('imageSmoothingEnabled' in ctx) {
+           ctx.imageSmoothingEnabled = false;
+        } else {
+           ctx.mozImageSmoothingEnabled = false;
+           ctx.msImageSmoothingEnabled = false;
+        }
+
+        let previous = 0;
+        let current = 0;
+        let passed = 0;
+        let fps = 1000 / 30;
+
+        //actors.forEach((a: Actor, index: number) => {a.play('idle');});
+
+        var anim = new Konva.Animation(function(frame) {
+            passed += frame.time - previous;
+            previous = frame.time;
+            if (passed < fps) {
+                return false;
+            }
+            actors = actors.sort((a: any, b: any) => a.obj.y() - b.obj.y());
+            actors.forEach((a: Actor, index: number) => {a.update(); a.obj.setZIndex(index);});
+            passed -= fps;
+            return true;
+        }, self.state.layer);
+
+        anim.start();
 
         this.playerEntities = [];
         this.state.client = new Client(def);
