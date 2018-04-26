@@ -1,7 +1,7 @@
 
 import { h, render } from 'preact';
-import Scene from './Scene';
+import Main from './Main';
 
 import "./style/main.sass";
 
-render(<Scene/>, document.querySelector('#app'));
+render(<Main/>, document.querySelector('#app'));

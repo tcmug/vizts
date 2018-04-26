@@ -1,7 +1,10 @@
 
-import {h, Component} from 'preact';
+import { h, Component } from 'preact';
+import Scene from './Scene';
+import Main from './Main';
 
 interface LoaderProps {
+    scene: Main;
     resources: {};
     finished: Function;
 }
@@ -9,7 +12,6 @@ interface LoaderState {
     loaded: number,
     toLoad: number,
 }
-
 
 
 export default class Loader extends Component<LoaderProps, LoaderState> {

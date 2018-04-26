@@ -27,9 +27,7 @@
     "webpack-node-externals": "^1.6.0"
   },
   "scripts": {
-    "backend": "node_modules/.bin/webpack --config webpack.server.js --watch",
-    "frontend": "node_modules/.bin/webpack-dev-server --config webpack.client.js  --hot --inline --colors --port 8080 --open",
-    "start": "node_modules/.bin/concurrently --kill-others \"node_modules/.bin/webpack --config webpack.server.js --watch\" \"node_modules/.bin/webpack-dev-server --config webpack.client.js  --hot --inline --colors --port 8080 --open\"",
-    "build": "node_modules/.bin/webpack --config webpack.server.js && node_modules/.bin/webpack --config webpack.client.js"
+    "start": "node_modules/.bin/webpack-dev-server --config webpack.client.js  --hot --inline --colors --port 8080 --open",
+    "build": "node_modules/.bin/webpack --config webpack.client.js"
   }
 }

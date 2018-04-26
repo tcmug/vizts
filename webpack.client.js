@@ -20,15 +20,6 @@ const client = {
         publicPath: publicPath,
         filename: 'bundle.js'
     },
-    devServer: {
-        contentBase: path.join(__dirname, "dist"),
-        proxy: {
-            '/socket.io': {
-                target: 'http://localhost:4040',
-                ws: true
-            }
-        }
-    },
     resolve: {
         extensions: ['.ts', '.tsx', '.js']
     },
