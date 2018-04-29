@@ -30,6 +30,13 @@ export class Actor {
     activeSequence: Sequence;
     sequences: SequenceMap;
 
+
+    _bind(event: string, method: string) {
+        this.obj.on(event, (event) => {
+            event.target.owner[method](event);
+        });
+    }
+
     constructor(stage: any, specs: any) {
 
         let self = this;
@@ -42,6 +49,10 @@ export class Actor {
             height: 32,
             draggable: true,
         });
+
+        this.obj.owner = this;
+        this._bind("dragend", "onDragEnd");
+
         stage.add(self.obj);
 
         this.stage = stage;
@@ -52,13 +63,6 @@ export class Actor {
         this.targetX = 0;Math.random() * 500;
         this.targetY = 0;
 
-        this.sequences = {};
-        this.sequences["walk-right"] = { start:0, count:4, speed: 400, loop:true } as Sequence;
-        this.sequences["walk-left"] = { start:4, count:4, speed: 400, loop:true } as Sequence;
-        this.sequences["idle"] = { start:8, count:4, speed: 400, loop:true } as Sequence;
-        this.play("idle"); //{ start:0, count:0, speed: 1000, loop:true } as Sequence;
-
-        this.walkTo(Math.random() * 500, Math.random() * 500);
         this._show();
     }
 
@@ -80,34 +84,14 @@ export class Actor {
         this.interval = null;
     }
 
-    _distanceToTarget = () => {
-        let x = this.obj.getX() - this.targetX;
-        let y = this.obj.getY() - this.targetY;
-        return Math.sqrt(x * x + y * y);
-    }
-
-    walkTo = (x: number, y: number) => {
-        if (x > this.obj.getX()) {
-            this.play("walk-right");
-        }
-        else {
-            this.play("walk-left");
-        }
-        this.targetX = x;
-        this.targetY = y;
-    }
-
     update = () => {
-        let distance = this._distanceToTarget();
-        if (distance > 1) {
-            let x = (this.targetX - this.obj.getX()) / distance;
-            let y = (this.targetY - this.obj.getY()) / distance;
-            this.obj.setX(this.obj.getX() + x);
-            this.obj.setY(this.obj.getY() + y);
-        }
-        else {
-            this.play("idle");
-        }
+    }
+
+    onDragStart = () => {
+    }
+
+    onDragEnd(event: any) {
+        console.log("hey");
     }
 
     _update() {

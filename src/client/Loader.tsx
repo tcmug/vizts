@@ -42,9 +42,9 @@ export default class Loader extends Component<LoaderProps, LoaderState> {
         }
     }
 
-    render() {
+    render({}, {loaded, toLoad}) {
     	return <div>
-    		    { this.state.loaded } / { this.state.toLoad }
+    		    { loaded } / { toLoad }
     		</div>;
     }
 }
