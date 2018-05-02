@@ -1,113 +1,58 @@
 
 import {h, Component} from 'preact';
-import Loader from './Loader'
-import Scene from './Scene';
+import { Scene } from './Scene';
 import * as Konva from 'Konva';
-import { Actor, Sequence } from './Actor';
+import { Onti } from './Onti';
+import { Player } from './Player';
+import { Entity, EntityList } from './Entity';
 
 export interface MainProps {
 }
 
 interface MainState {
+    scene: Scene;
+    player: Entity;
+    stage: any;
 	ready: boolean;
     layer: any;
-	resources: {};
-    resourceSources: {},
-    actors: Array<Actor>;
+    entities: EntityList;
 }
 
-
-export class Onti extends Actor {
-
-    constructor(stage: any, specs: any) {
-        super(stage, specs);
-
-        this.sequences = {};
-        this.sequences["walk-right"] = { start:0, count:4, speed: 400, loop:true } as Sequence;
-        this.sequences["walk-left"] = { start:4, count:4, speed: 400, loop:true } as Sequence;
-        this.sequences["idle"] = { start:8, count:4, speed: 400, loop:true } as Sequence;
-        this.play("idle");
-
-        this.walkTo(Math.random() * 500, Math.random() * 500);
-    }
-
-    walkTo = (x: number, y: number) => {
-        if (x > this.obj.getX()) {
-            this.play("walk-right");
-        }
-        else {
-            this.play("walk-left");
-        }
-        this.targetX = x;
-        this.targetY = y;
-    }
-
-    onDragEnd(event: any) {
-        console.log("ended");
-        this.walkTo(Math.random() * 500, Math.random() * 500);
-    }
-
-    _distanceToTarget = () => {
-        let x = this.obj.getX() - this.targetX;
-        let y = this.obj.getY() - this.targetY;
-        return Math.sqrt(x * x + y * y);
-    }
-
-    update = () => {
-        if (this.sequenceName == "idle") {
-            return;
-        }
-        let distance = this._distanceToTarget();
-        if (distance > 1) {
-            let x = (this.targetX - this.obj.getX()) / distance;
-            let y = (this.targetY - this.obj.getY()) / distance;
-            this.obj.setX(this.obj.getX() + x);
-            this.obj.setY(this.obj.getY() + y);
-        }
-        else {
-            this.play("idle");
-        }
-    }
-
-};
 
 
 export default class Main extends Component<MainProps, MainState> {
 
 	state = {
+        scene: null,
+        stage: null,
+        player: null,
 		ready: false,
         layer: null,
-		resources: {},
-        actors: [],
-        resourceSources: {
-            'dude': require("../../assets/dude.png"),
-            'onti': require("../../assets/onti.png"),
-        },
+        entities: []
 	};
 
-    finishedLoading = (resources) => {
-        this.setState({ready: true, resources: resources});
-    }
-
     enterFrame = (frame: any) => {
-        let actors = this.state.actors;
-        actors = actors.sort((a: any, b: any) => a.obj.y() - b.obj.y());
-        actors.forEach((a: Actor, index: number) => {a.update(); a.obj.setZIndex(index);});
+        let entities = this.state.entities;
+        entities = entities.sort((a: any, b: any) => a.group.y() - b.group.y());
+        entities.forEach((a: Entity, index: number) => {a.update(); a.group.setZIndex(index);});
     }
 
-    enterScene = (stage: any) => {
+    enterScene = (scene: Scene) => {
 
-        let actors = this.state.actors;
+        let stage = scene.getStage();
+        let entities = this.state.entities;
         let layer = new Konva.Layer();
 
-        this.setState({layer: layer});
+        scene.setState({layer: layer});
+        this.setState({stage: stage, layer: layer});
+        entities.push(new Onti(scene));
+        entities.push(new Onti(scene));
+        entities.push(new Onti(scene));
 
         let self = this;
-        let i : number = 0;
-        for (i = 0; i < 10; i++) {
-            let actor = new Onti(layer, {image: this.state.resources['onti']});
-            actors.push(actor);
-        }
+        let player = new Player(scene);
+        entities.push(player);
+        this.setState({player: player});
 
         stage.add(layer);
 
@@ -119,17 +64,22 @@ export default class Main extends Component<MainProps, MainState> {
            ctx.msImageSmoothingEnabled = false;
         }
 
+        stage.on("contentClick", (event) => {
+            self.onClick(event);
+        });
+
         return this.state.layer;
     }
 
-    render({}, {resourceSources, resources, ready}) {
-    	if (!ready) {
-	    	return <Loader scene={this} resources={resourceSources} finished={this.finishedLoading}/>
-        }
+    onClick = (event) => {
+        const p = this.state.stage.getPointerPosition();
+        this.state.player.walkTo(p.x, p.y);
+    }
+
+    render() {
         return <Scene
-            enterScene={this.enterScene}
-            enterFrame={this.enterFrame}
-            resources={resources}
-            />;
+            enterScene = { this.enterScene }
+            enterFrame = { this.enterFrame }
+        />;
     }
 }

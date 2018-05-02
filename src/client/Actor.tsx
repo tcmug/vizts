@@ -1,126 +1,100 @@
 
+import { Entity } from './Entity';
+import { SpriteGraphics } from './Sprite';
+import { Scene } from './Scene';
+import { Point } from './Point';
 
 import * as Konva from 'Konva';
 
-export class Sequence {
-    start: number;
-    count: number;
-    speed: number;
-    loop: boolean;
-};
+export class Actor extends Entity {
 
-interface SequenceMap {
-    [name: string]: Sequence;
-};
+	group: any;
+    voice: any;
+    target: Point;
 
-export class Actor {
+	constructor(scene: Scene, sheet: any) {
+		super(scene);
 
-	obj: any;
-    frameWidth: number;
-    frameHeight: number;
-    sequence: string;
-	frame: number;
-    frames: number;
-    framesPerRow: number;
-	stage: any;
-    interval: any;
-    targetX: number;
-    targetY: number;
-    sequenceName: string;
-    activeSequence: Sequence;
-    sequences: SequenceMap;
+		this.position = new Point(0, 0);
+		this.position.random(0, 0, 500, 500);
 
+		this.group = new Konva.Group({
+			x: this.position.x,
+			y: this.position.y
+		});
 
-    _bind(event: string, method: string) {
-        this.obj.on(event, (event) => {
-            event.target.owner[method](event);
-        });
-    }
-
-    constructor(stage: any, specs: any) {
-
-        let self = this;
-
-        this.obj = new Konva.Image({
-            x: Math.random() * 500,
-            y: Math.random() * 500,
-            image: specs.image,
-            width: 32,
-            height: 32,
-            draggable: true,
+        this.voice = new Konva.Text({
+          x: -16,
+          y: -32 - 16,
+          text: '',
+          fontSize: 15,
+          fontFamily: 'Munro',
+          fill: '#fff',
+          align: 'center',
+          shadowEnabled: true,
+          shadowOffset: {x: 1, y: 1},
+          shadowBlur: 0
         });
 
-        this.obj.owner = this;
-        this._bind("dragend", "onDragEnd");
+        this.group.add(this.voice);
 
-        stage.add(self.obj);
+		this.graphicsHandler = new SpriteGraphics(scene, this, sheet);
+		this.play('idle');
+        this.walkTo(Math.random() * 500, Math.random() * 500);
+	}
 
-        this.stage = stage;
-        this.frame = 0;
-        this.frameHeight = 8;
-        this.frameWidth = 8;
-        this.framesPerRow = 4;
-        this.targetX = 0;Math.random() * 500;
-        this.targetY = 0;
-
-        this._show();
+    speak = (voice: string) => {
+        this.voice.text(voice);
+        this.voice.show();
+        let v = this.voice;
+        setTimeout(() => {v.hide();}, 2000);
     }
+
 
     play = (sequence: string) => {
-        if (this.sequenceName == sequence) {
-            return;
+        (this.graphicsHandler as SpriteGraphics).play(sequence);
+    }
+
+    walkTo = (x: number, y: number) => {
+        if (x > this.group.getX()) {
+            this.play("walk-right");
         }
-        this.activeSequence = this.sequences[sequence];
-        this.frame = this.activeSequence.start;
-        if (this.interval) {
-            clearInterval(this.interval);
+        else {
+            this.play("walk-left");
         }
-        this.sequenceName = sequence;
-        this.interval = setInterval(() => this._update(), this.activeSequence.speed);
-    }
-
-    stop = () => {
-        clearInterval(this.interval);
-        this.interval = null;
-    }
-
-    update = () => {
-    }
-
-    onDragStart = () => {
+        this.target = new Point(x, y);
     }
 
     onDragEnd(event: any) {
-        console.log("hey");
+        this.walkTo(Math.random() * 500, Math.random() * 500);
     }
 
-    _update() {
-    	if (this.frame >= this.activeSequence.start + this.activeSequence.count) {
-            if (this.activeSequence.loop) {
-    		    this.frame = this.activeSequence.start;
-            }
-            else {
-                this.stop();
-                return;
-            }
-    	}
-
-        this._show();
-        this.frame++;
+    _distanceToTarget = () => {
+        return this.target.distanceTo(
+            {x: this.group.getX(), y: this.group.getY()} as Point
+        );
     }
 
-    _show() {
-        let y = Math.floor(this.frame / this.framesPerRow) * this.frameHeight;
-        let x = (this.frame * this.frameWidth) - (y * this.framesPerRow);
-
-        this.obj.crop({
-            x: x,
-            y: y,
-            width: this.frameWidth,
-            height: this.frameHeight,
-        });
-
+    update = () => {
+        if ((this.graphicsHandler as SpriteGraphics).sequenceName == "idle") {
+            return;
+        }
+        let distance = this._distanceToTarget();
+        if (distance > 1) {
+            let x = (this.target.x - this.group.getX()) / distance;
+            let y = (this.target.y - this.group.getY()) / distance;
+            this.group.setX(this.group.getX() + x);
+            this.group.setY(this.group.getY() + y);
+        }
+        else {
+            const myArray = [
+                "Graagh",
+                "Grh",
+                "Mrh?",
+            ];
+            var rand = myArray[Math.floor(Math.random() * myArray.length)];
+            this.speak(rand);
+            this.play("idle");
+        }
     }
-
 }
-

@@ -1,0 +1,139 @@
+
+export class Onti extends Actor {
+
+    voice: any;
+
+    constructor(stage: any, specs: any) {
+        super(stage, specs);
+
+        this.sequences = {};
+        this.sequences["walk-right"] = { start:0, count:4, speed: 400, loop:true } as Sequence;
+        this.sequences["walk-left"] = { start:4, count:4, speed: 400, loop:true } as Sequence;
+        this.sequences["idle"] = { start:8, count:4, speed: 400, loop:true } as Sequence;
+        this.play("idle");
+
+        this.voice = new Konva.Text({
+          x: 0,
+          y: -25,
+          text: '',
+          fontSize: 15,
+          fontFamily: 'Munro',
+          fill: '#fff',
+          align: 'center',
+          shadowEnabled: true,
+          shadowOffset: {x: 1, y: 1},
+          shadowBlur: 0
+        });
+
+        this.group.add(this.voice);
+
+        this.walkTo(Math.random() * 500, Math.random() * 500);
+    }
+
+    speak = (voice: string) => {
+        this.voice.text(voice);
+        this.voice.show();
+        let v = this.voice;
+        setTimeout(() => {v.hide();}, 2000);
+    }
+
+    walkTo = (x: number, y: number) => {
+        if (x > this.group.getX()) {
+            this.play("walk-right");
+        }
+        else {
+            this.play("walk-left");
+        }
+        this.targetX = x;
+        this.targetY = y;
+    }
+
+    onDragEnd(event: any) {
+        this.walkTo(Math.random() * 500, Math.random() * 500);
+    }
+
+    _distanceToTarget = () => {
+        let x = this.group.getX() - this.targetX;
+        let y = this.group.getY() - this.targetY;
+        return Math.sqrt(x * x + y * y);
+    }
+
+    update = () => {
+        if (this.sequenceName == "idle") {
+            return;
+        }
+        let distance = this._distanceToTarget();
+        if (distance > 1) {
+            let x = (this.targetX - this.group.getX()) / distance;
+            let y = (this.targetY - this.group.getY()) / distance;
+            this.group.setX(this.group.getX() + x);
+            this.group.setY(this.group.getY() + y);
+        }
+        else {
+            const myArray = [
+                "Graagh",
+                "Grh",
+                "Mrh?",
+            ];
+            var rand = myArray[Math.floor(Math.random() * myArray.length)];
+            this.speak(rand);
+            this.play("idle");
+        }
+    }
+
+};
+
+
+export class Player extends Onti {
+
+    constructor(stage: any, specs: any) {
+        super(stage, specs);
+
+        this.sequences = {};
+        this.sequences["walk-right"] = { start:0, count:4, speed: 400, loop:true } as Sequence;
+        this.sequences["walk-left"] = { start:4, count:4, speed: 400, loop:true } as Sequence;
+        this.sequences["idle"] = { start:8, count:4, speed: 400, loop:true } as Sequence;
+        this.play("idle");
+
+        this.walkTo(Math.random() * 500, Math.random() * 500);
+    }
+
+    walkTo = (x: number, y: number) => {
+        if (x > this.group.getX()) {
+            this.play("walk-right");
+        }
+        else {
+            this.play("walk-left");
+        }
+        this.targetX = x;
+        this.targetY = y;
+    }
+
+    onDragEnd(event: any) {
+        this.walkTo(Math.random() * 500, Math.random() * 500);
+    }
+
+    _distanceToTarget = () => {
+        let x = this.group.getX() - this.targetX;
+        let y = this.group.getY() - this.targetY;
+        return Math.sqrt(x * x + y * y);
+    }
+
+    update = () => {
+        if (this.sequenceName == "idle") {
+            return;
+        }
+        let distance = this._distanceToTarget();
+        if (distance > 1) {
+            let x = (this.targetX - this.group.getX()) / distance;
+            let y = (this.targetY - this.group.getY()) / distance;
+            this.group.setX(this.group.getX() + x);
+            this.group.setY(this.group.getY() + y);
+        }
+        else {
+            this.play("idle");
+        }
+    }
+
+};
+

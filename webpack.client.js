@@ -51,6 +51,13 @@ const client = {
                 test: /\.(jpg|png|svg)$/,
                 loader: "file-loader",
                 include: assetsPath
+            },
+            {
+              test: /\.(ttf|eot|woff|woff2)$/,
+              loader: "file-loader",
+              options: {
+                name: "fonts/[name].[ext]",
+              },
             }
         ]
     }

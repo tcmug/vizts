@@ -1,13 +1,13 @@
 
-import {h, Component} from 'preact';
+import { h, Component } from 'preact';
 import * as Konva from 'Konva';
 
 
 export interface SceneProps {
-    resources: {};
     enterFrame: Function;
     enterScene: Function;
 }
+
 
 interface SceneState {
     layer: any;
@@ -15,7 +15,7 @@ interface SceneState {
 }
 
 
-export default class Scene extends Component<SceneProps, SceneState> {
+export class Scene extends Component<SceneProps, SceneState> {
 
     state = {
         layer: null,
@@ -46,19 +46,27 @@ export default class Scene extends Component<SceneProps, SceneState> {
 
     }
 
+    getStage() {
+        return this.state.stage;
+    }
+
+    getLayer() {
+        return this.state.layer;
+    }
+
     componentDidMount() {
 
         window.addEventListener('resize', this.fitToWindow);
 
         let self = this;
-
+        Konva.pixelRatio = 1;
         this.state.stage = new Konva.Stage({
           container: "#World",
           width: this.divElement.clientWidth,
           height: this.divElement.clientHeight
         });
 
-        self.state.layer = this.props.enterScene(this.state.stage);
+        self.state.layer = this.props.enterScene(this);
 
         let previous = 0;
         let current = 0;
