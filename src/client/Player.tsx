@@ -13,6 +13,11 @@ export class Player extends Actor {
 
 	constructor(scene: Scene) {
 		super(scene, ontimg);
+		this.speed = 1.2;
 	}
+
+    reachTarget() {
+        this.play("idle");
+    }
 
 }

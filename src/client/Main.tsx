@@ -5,6 +5,7 @@ import * as Konva from 'Konva';
 import { Onti } from './Onti';
 import { Player } from './Player';
 import { Entity, EntityList } from './Entity';
+import { World } from './World';
 
 export interface MainProps {
 }
@@ -15,10 +16,8 @@ interface MainState {
     stage: any;
 	ready: boolean;
     layer: any;
-    entities: EntityList;
+    world: World;
 }
-
-
 
 export default class Main extends Component<MainProps, MainState> {
 
@@ -28,26 +27,29 @@ export default class Main extends Component<MainProps, MainState> {
         player: null,
 		ready: false,
         layer: null,
-        entities: []
+        world: new World(),
 	};
 
     enterFrame = (frame: any) => {
-        let entities = this.state.entities;
+        let entities = this.state.world.entities;
         entities = entities.sort((a: any, b: any) => a.group.y() - b.group.y());
-        entities.forEach((a: Entity, index: number) => {a.update(); a.group.setZIndex(index);});
+        entities.forEach((a: Entity, index: number) => {a.update(this.state.world); a.group.setZIndex(index);});
     }
 
     enterScene = (scene: Scene) => {
 
         let stage = scene.getStage();
-        let entities = this.state.entities;
+        let entities = this.state.world.entities;
         let layer = new Konva.Layer();
+
+        // layer.getCanvas().setPixelRatio(1);
 
         scene.setState({layer: layer});
         this.setState({stage: stage, layer: layer});
-        entities.push(new Onti(scene));
-        entities.push(new Onti(scene));
-        entities.push(new Onti(scene));
+
+        for (let i = 0; i < 2; i++) {
+            entities.push(new Onti(scene));
+        }
 
         let self = this;
         let player = new Player(scene);

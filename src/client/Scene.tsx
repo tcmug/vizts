@@ -22,7 +22,7 @@ export class Scene extends Component<SceneProps, SceneState> {
         stage: null,
     }
 
-    divElement: any;
+    sceneWrapper: any;
 
     constructor(props) {
         super(props);
@@ -30,8 +30,8 @@ export class Scene extends Component<SceneProps, SceneState> {
 
     fitToWindow = () => {
 
-        const width = this.divElement.offsetWidth;
-        const height = this.divElement.offsetHeight;
+        const width = this.sceneWrapper.offsetWidth;
+        const height = this.sceneWrapper.offsetHeight;
 
         this.state.stage.width(width)
         this.state.stage.height(height);
@@ -59,11 +59,11 @@ export class Scene extends Component<SceneProps, SceneState> {
         window.addEventListener('resize', this.fitToWindow);
 
         let self = this;
-        Konva.pixelRatio = 1;
+
         this.state.stage = new Konva.Stage({
           container: "#World",
-          width: this.divElement.clientWidth,
-          height: this.divElement.clientHeight
+          width: this.sceneWrapper.clientWidth,
+          height: this.sceneWrapper.clientHeight
         });
 
         self.state.layer = this.props.enterScene(this);
@@ -71,16 +71,16 @@ export class Scene extends Component<SceneProps, SceneState> {
         let previous = 0;
         let current = 0;
         let passed = 0;
-        let fps = 1000 / 30;
+        let ms_per_frame = 1000 / 30;
 
         var anim = new Konva.Animation((frame) => {
 
             passed += frame.time - previous;
             previous = frame.time;
-            if (passed < fps) {
+            if (passed < ms_per_frame) {
                 return false;
             }
-            passed -= fps;
+            passed -= ms_per_frame;
             self.props.enterFrame(frame);
 
             return true;
@@ -91,6 +91,6 @@ export class Scene extends Component<SceneProps, SceneState> {
     }
 
     render(props) {
-        return <div ref={ (divElement) => this.divElement = divElement} id="World"/>
+        return <div ref={ (sceneWrapper) => this.sceneWrapper = sceneWrapper} id="World"/>
     }
 }

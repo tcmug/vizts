@@ -2,13 +2,24 @@
 import { Point } from './Point';
 import { InputComponent, GraphicsComponent } from './Component';
 import { Scene } from './Scene';
+import { World } from './World';
+
+let _id = 1;
 
 export class Entity {
 
+	id: number;
+
 	constructor(scene: Scene) {
+		this.id = _id;
+		_id = _id + 1;
 	}
 
-	update = () => {
+	setPosition(point: Point) {
+		this.position = point;
+	}
+
+	update(world: World) {
 	}
 
 	group: any;
