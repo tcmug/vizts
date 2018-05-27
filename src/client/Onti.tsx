@@ -8,7 +8,7 @@ import { Player } from './Player';
 import * as Konva from 'Konva';
 
 let ontimg = new Image();
-ontimg.src = require('../../assets/onti.png');;
+ontimg.src = require('../../assets/onti.png');
 
 const STATE_WANDERING = 1;
 const STATE_FOLLOWING = 2;

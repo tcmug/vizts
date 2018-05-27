@@ -2,7 +2,9 @@
 import {h, Component} from 'preact';
 import { Scene } from './Scene';
 import * as Konva from 'Konva';
+import { Actor } from './Actor';
 import { Onti } from './Onti';
+import { Character } from './Character';
 import { Player } from './Player';
 import { Entity, EntityList } from './Entity';
 import { World } from './World';
@@ -42,14 +44,16 @@ export default class Main extends Component<MainProps, MainState> {
         let entities = this.state.world.entities;
         let layer = new Konva.Layer();
 
-        // layer.getCanvas().setPixelRatio(1);
+        layer.getCanvas().setPixelRatio(1);
 
         scene.setState({layer: layer});
         this.setState({stage: stage, layer: layer});
 
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 0; i++) {
             entities.push(new Onti(scene));
         }
+
+        entities.push(new Character(scene));
 
         let self = this;
         let player = new Player(scene);
@@ -66,16 +70,26 @@ export default class Main extends Component<MainProps, MainState> {
            ctx.msImageSmoothingEnabled = false;
         }
 
-        stage.on("contentClick", (event) => {
+        stage.on("click", (event) => {
             self.onClick(event);
         });
 
         return this.state.layer;
     }
 
+     entityTap = (entity: Entity) => {
+        console.log("This is a " + entity.constructor.name);
+        this.state.player.walkTo(entity.position.x - 32, entity.position.y);
+    }
+
     onClick = (event) => {
-        const p = this.state.stage.getPointerPosition();
-        this.state.player.walkTo(p.x, p.y);
+        if (event.target.nodeType == 'Shape' && event.target.parent && event.target.parent.owner) {
+            this.entityTap(event.target.parent.owner);
+        }
+        else {
+            const p = this.state.stage.getPointerPosition();
+            this.state.player.walkTo(p.x, p.y);
+        }
     }
 
     render() {

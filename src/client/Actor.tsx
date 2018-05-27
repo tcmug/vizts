@@ -26,6 +26,8 @@ export class Actor extends Entity {
 			y: this.position.y
 		});
 
+        this.group.owner = this;
+
         this.voice = new Konva.Text({
           x: -16,
           y: -32 - 16,
@@ -38,12 +40,14 @@ export class Actor extends Entity {
           shadowOffset: {x: 1, y: 1},
           shadowBlur: 0
         });
+
         this.voice.transformsEnabled('position');
         this.group.add(this.voice);
 
 		this.graphicsHandler = new SpriteGraphics(scene, this, sheet);
 		this.play('idle');
 	}
+
 
     speak(voice: string) {
         this.voice.text(voice);

@@ -9,9 +9,11 @@ let _id = 1;
 export class Entity {
 
 	id: number;
+	scene: Scene;
 
 	constructor(scene: Scene) {
 		this.id = _id;
+		this.scene = scene;
 		_id = _id + 1;
 	}
 
