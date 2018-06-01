@@ -54,7 +54,7 @@ export class SpriteGraphics extends GraphicsComponent {
         this.frameWidth = 8;
         this.framesPerRow = 4;
         this._show();
-        scene.getLayer().add(entity.group);
+        //scene.getLayer().add(entity.group);
 	}
 
     _show() {

@@ -4,6 +4,7 @@ import { SpriteGraphics } from './Sprite';
 import { Scene } from './Scene';
 import { Point } from './Point';
 import { World } from './World';
+import {h, Component} from 'preact';
 
 import * as Konva from 'Konva';
 
@@ -110,3 +111,5 @@ export class Actor extends Entity {
         }
     }
 }
+
+
