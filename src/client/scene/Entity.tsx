@@ -5,74 +5,79 @@ import { Layer } from "./Layer";
 import * as Konva from "konva";
 
 export interface EntityProps {
-  position: Point;
-  layer?: Layer;
+	position: Point;
+	layer?: Layer;
+	sprite?: Konva.Sprite;
 }
 
 interface EntityState {
-  id: number;
-  position: Point;
-  layer: Layer;
-  inputHandler: InputComponent | null;
-  graphicsHandler: GraphicsComponent | null;
-  group: any;
+	id: number;
+	position: Point;
+	layer: Layer;
+	inputHandler: InputComponent | null;
+	graphicsHandler: GraphicsComponent | null;
+	group: any;
 }
 
 let _id: number = 1;
 
 export class Entity extends Component<EntityProps, EntityState> {
-  state = {
-    id: -1,
-    position: null,
-    layer: null,
-    inputHandler: null,
-    graphicsHandler: null,
-    group: null
-  };
+	state = {
+		id: -1,
+		position: null,
+		layer: null,
+		inputHandler: null,
+		graphicsHandler: null,
+		group: null
+	};
 
-  constructor(props) {
-    super(props);
-    this.setState({
-      position: props.position,
-      id: _id,
-      layer: props.layer
-    });
-    _id = _id + 1;
-  }
+	constructor(props) {
+		super(props);
+		this.setState({
+			position: props.position,
+			id: _id,
+			layer: props.layer
+		});
+		if (props.sprite) {
+			this.setState({ group: props.sprite });
+		}
+		_id = _id + 1;
+	}
 
-  componentDidMount() {
-    const pos = this.state.position;
+	componentDidMount() {
+		const pos = this.state.position;
 
-    let rect = new Konva.Rect({
-      x: pos.x,
-      y: pos.y,
-      width: 5,
-      height: 5,
-      fill: "red",
-      stroke: "black",
-      strokeWidth: 2
-    });
+		if (!this.state.group) {
+			let rect = new Konva.Rect({
+				x: pos.x,
+				y: pos.y,
+				width: 5,
+				height: 5,
+				fill: "red",
+				stroke: "black",
+				strokeWidth: 2
+			});
 
-    this.setState({
-      group: rect
-    });
+			this.setState({
+				group: rect
+			});
+		}
+		this.state.layer.add(this.state.group);
+		this.state.layer.draw();
+	}
 
-    this.state.layer.add(rect);
-    this.state.layer.draw();
-  }
+	setPosition(point: Point) {
+		this.setState({ position: point });
+		this.state.group.setX(this.state.position.x);
+		this.state.group.setY(this.state.position.y);
+	}
 
-  setPosition(point: Point) {
-    this.setState({ position: point });
-    this.state.group.setX(this.state.position.x);
-    this.state.group.setY(this.state.position.y);
-  }
-
-  render() {
-    return (
-      <span class="entity">
-        #{this.state.id} {this.state.position && this.state.position.x}{" "}
-        {this.state.position && this.state.position.y}
-      </span>
-    );
-  }
+	render() {
+		return (
+			<span class="entity">
+				#{this.state.id} {this.state.position && this.state.position.x}{" "}
+				{this.state.position && this.state.position.y}
+			</span>
+		);
+	}
 }

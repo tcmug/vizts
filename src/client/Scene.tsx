@@ -22,7 +22,7 @@ export class Scene extends Component<SceneProps, SceneState> {
     const width = this.sceneWrapper.offsetWidth;
     const height = this.sceneWrapper.offsetHeight;
 
-    this.state.stage.width(width);
+    // this.state.stage.width(width);
     this.state.stage.height(height);
   };
 
