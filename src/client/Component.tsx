@@ -1,14 +1,10 @@
-
-import { Entity } from './Entity';
+import { Entity } from "./Entity";
 
 export class InputComponent {
-    click = (entity: Entity) => {
-    }
-    keyboard = (entity: Entity) => {
-    }
+  click = (entity: Entity) => {};
+  keyboard = (entity: Entity) => {};
 }
 
 export class GraphicsComponent {
-    update = (entity: Entity) => {
-    }
+  update = (entity: Entity) => {};
 }

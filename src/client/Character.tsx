@@ -8,7 +8,7 @@ import * as Konva from "konva";
 let ontimg = new Image();
 ontimg.src = require("../../assets/dude.png");
 
-export class Player extends Actor {
+export class Character extends Actor {
   constructor(scene: Scene) {
     super(scene, ontimg);
     this.speed = 1.2;
