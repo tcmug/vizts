@@ -1,6 +1,5 @@
 import { h, Component } from "preact";
 import { Point } from "../Point";
-import { InputComponent, GraphicsComponent } from "../Component";
 import { Layer } from "./Layer";
 import * as Konva from "konva";
 
@@ -8,15 +7,17 @@ export interface EntityProps {
 	position: Point;
 	layer?: Layer;
 	sprite?: Konva.Sprite;
+	init?: Function;
+	canPickup?: boolean;
 }
 
 interface EntityState {
 	id: number;
 	position: Point;
 	layer: Layer;
-	inputHandler: InputComponent | null;
-	graphicsHandler: GraphicsComponent | null;
 	group: any;
+	target: Point;
+	speed: number;
 }
 
 let _id: number = 1;
@@ -28,7 +29,9 @@ export class Entity extends Component<EntityProps, EntityState> {
 		layer: null,
 		inputHandler: null,
 		graphicsHandler: null,
-		group: null
+		group: null,
+		target: null,
+		speed: 3
 	};
 
 	constructor(props) {
@@ -57,19 +60,18 @@ export class Entity extends Component<EntityProps, EntityState> {
 				stroke: "black",
 				strokeWidth: 2
 			});
-
 			this.setState({
 				group: rect
 			});
+		} else {
+			this.state.group.setX(pos.x).setY(pos.y);
+			this.state.group.start();
 		}
 		this.state.layer.add(this.state.group);
-		this.state.layer.draw();
-	}
 
-	setPosition(point: Point) {
-		this.setState({ position: point });
-		this.state.group.setX(this.state.position.x);
-		this.state.group.setY(this.state.position.y);
+		if (this.props.init) {
+			this.props.init(this);
+		}
 	}
 
 	render() {
@@ -79,5 +81,46 @@ export class Entity extends Component<EntityProps, EntityState> {
 				{this.state.position && this.state.position.y}
 			</span>
 		);
+	}
+
+	/******/
+
+	public walkTo = (x: number, y: number) => {
+		if (x > this.state.group.getX()) {
+			this.state.group.animation("walkRight");
+		} else {
+			this.state.group.animation("walkLeft");
+		}
+		//this.state.group.start();
+		this.setState({ target: new Point(x, y) });
+	};
+
+	reachTarget() {
+		this.state.group.animation("stand");
+		this.setState({ target: null });
+	}
+
+	setPosition(point: Point) {
+		this.setState({ position: point });
+		this.state.group.setX(this.state.position.x).setY(this.state.position.y);
+	}
+
+	update() {
+		if (this.state.target == null) {
+			return;
+		}
+		const target = this.state.target;
+		let distance = target.distanceTo(this.state.position);
+		if (distance > 3) {
+			let point = new Point(
+				(target.x - this.state.group.getX()) / distance,
+				(target.y - this.state.group.getY()) / distance
+			);
+			point.mul(new Point(this.state.speed, this.state.speed));
+			point.add(this.state.position);
+			this.setPosition(point);
+		} else {
+			this.reachTarget();
+		}
 	}
 }

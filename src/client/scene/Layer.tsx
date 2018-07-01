@@ -1,6 +1,4 @@
 import { h, Component, cloneElement } from "preact";
-import { Point } from "../Point";
-import { InputComponent, GraphicsComponent } from "../Component";
 import * as Konva from "konva";
 
 export interface LayerProps {
