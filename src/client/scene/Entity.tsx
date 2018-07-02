@@ -11,7 +11,7 @@ export interface EntityProps {
 	canPickup?: boolean;
 }
 
-interface EntityState {
+export interface EntityState {
 	id: number;
 	position: Point;
 	layer: Layer;
@@ -27,8 +27,6 @@ export class Entity extends Component<EntityProps, EntityState> {
 		id: -1,
 		position: null,
 		layer: null,
-		inputHandler: null,
-		graphicsHandler: null,
 		group: null,
 		target: null,
 		speed: 3
@@ -67,6 +65,7 @@ export class Entity extends Component<EntityProps, EntityState> {
 			this.state.group.setX(pos.x).setY(pos.y);
 			this.state.group.start();
 		}
+		this.state.group.self = this;
 		this.state.layer.add(this.state.group);
 
 		if (this.props.init) {
@@ -103,6 +102,10 @@ export class Entity extends Component<EntityProps, EntityState> {
 	setPosition(point: Point) {
 		this.setState({ position: point });
 		this.state.group.setX(this.state.position.x).setY(this.state.position.y);
+	}
+
+	pickUp(item: Entity) {
+		item.state.group.hide();
 	}
 
 	update() {

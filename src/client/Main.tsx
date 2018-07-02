@@ -5,6 +5,7 @@ import { Point } from "./Point";
 
 import { Layer } from "./scene/Layer";
 import { Entity } from "./scene/Entity";
+import { Item } from "./scene/Item";
 
 export interface MainProps {}
 
@@ -57,8 +58,10 @@ export default class Main extends Component<MainProps, MainState> {
 		});
 	};
 
-	leClick = e => {
-		this.state.player.walkTo(e.clientX, e.clientY);
+	leClick = entity => {
+		if (entity != this.state.player) {
+			this.state.player.pickUp(entity);
+		}
 	};
 
 	save = e => {
@@ -84,7 +87,7 @@ export default class Main extends Component<MainProps, MainState> {
 						sprite={spr.clone()}
 						position={new Point(300, 300)}
 					/>
-					<Entity canPickup position={new Point(200, 200)} />
+					<Item position={new Point(200, 200)} />
 				</Layer>
 			</Scene>
 		);

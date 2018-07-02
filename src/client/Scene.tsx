@@ -42,6 +42,10 @@ export class Scene extends Component<SceneProps, SceneState> {
 				height: this.sceneWrapper.clientHeight
 			})
 		});
+
+		this.state.stage.on("click", entity => {
+			if (entity.target.self) this.props.onClick(entity.target.self);
+		});
 	}
 
 	renderChildren(props) {
@@ -55,11 +59,7 @@ export class Scene extends Component<SceneProps, SceneState> {
 
 	render(props) {
 		return (
-			<div
-				onClick={e => this.props.onClick(e)}
-				ref={sceneWrapper => (this.sceneWrapper = sceneWrapper)}
-				id="World"
-			>
+			<div ref={sceneWrapper => (this.sceneWrapper = sceneWrapper)} id="World">
 				{this.renderChildren(props)}
 			</div>
 		);
