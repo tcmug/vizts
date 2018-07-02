@@ -2,7 +2,8 @@ import { h, Component, cloneElement } from "preact";
 import * as Konva from "konva";
 
 export interface SceneProps {
-	onClick?: Function;
+	entityClick?: Function;
+	backgroundClick?: Function;
 }
 
 interface SceneState {
@@ -34,17 +35,23 @@ export class Scene extends Component<SceneProps, SceneState> {
 		//window.addEventListener("resize", this.fitToWindow);
 
 		let self = this;
-
-		this.setState({
-			stage: new Konva.Stage({
-				container: "#World",
-				width: this.sceneWrapper.clientWidth,
-				height: this.sceneWrapper.clientHeight
-			})
+		const stage = new Konva.Stage({
+			container: "#World",
+			width: this.sceneWrapper.clientWidth,
+			height: this.sceneWrapper.clientHeight
 		});
 
-		this.state.stage.on("click", entity => {
-			if (entity.target.self) this.props.onClick(entity.target.self);
+		stage.on("click", e => {
+			const node = e.target as any;
+			if (node.nodeType == "Stage") {
+				this.props.backgroundClick(stage.getPointerPosition());
+			} else {
+				this.props.entityClick(node.self);
+			}
+		});
+
+		this.setState({
+			stage: stage
 		});
 	}
 

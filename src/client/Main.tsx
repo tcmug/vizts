@@ -58,10 +58,14 @@ export default class Main extends Component<MainProps, MainState> {
 		});
 	};
 
-	leClick = entity => {
+	entClick = entity => {
 		if (entity != this.state.player) {
 			this.state.player.pickUp(entity);
 		}
+	};
+
+	bgClick = e => {
+		this.state.player.walkTo(e.x, e.y);
 	};
 
 	save = e => {
@@ -72,7 +76,7 @@ export default class Main extends Component<MainProps, MainState> {
 		const spr = this.state.sprite;
 		const entities = this.state.entities;
 		return (
-			<Scene onClick={this.leClick}>
+			<Scene entityClick={this.entClick} backgroundClick={this.bgClick}>
 				<Layer fps={30} frame={this.updateFrame} smoothing={false}>
 					{entities.map(entity => {
 						return (
