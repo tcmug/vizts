@@ -63,11 +63,15 @@ export class Entity extends Component<EntityProps, EntityState> {
 			});
 		} else {
 			this.state.group.setX(pos.x).setY(pos.y);
-			this.state.group.start();
+			if (this.state.group.start) {
+				this.state.group.start();
+			} else {
+				this.state.group.cache();
+				this.state.group.drawHitFromCache();
+			}
 		}
 		this.state.group.self = this;
 		this.state.layer.add(this.state.group);
-
 		if (this.props.init) {
 			this.props.init(this);
 		}
