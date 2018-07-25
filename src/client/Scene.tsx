@@ -46,7 +46,7 @@ export class Scene extends Component<SceneProps, SceneState> {
 			if (node.nodeType == "Stage") {
 				this.props.backgroundClick(stage.getPointerPosition());
 			} else {
-				this.props.entityClick(node.self);
+				this.props.entityClick(node.self, stage.getPointerPosition());
 			}
 		});
 

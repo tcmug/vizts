@@ -5,8 +5,9 @@ import { Point } from "./Point";
 
 import Loader from "./Loader";
 import { Layer } from "./scene/Layer";
-import { Entity } from "./scene/Entity";
+import { Entity, HitBox } from "./scene/Entity";
 import { Item } from "./scene/Item";
+import { Area } from "./scene/Area";
 
 export interface MainProps {}
 
@@ -25,6 +26,7 @@ interface MainState {
 	test: any;
 	loading: any;
 	resources: any;
+	back: any;
 }
 
 export default class Main extends Component<MainProps, MainState> {
@@ -36,7 +38,8 @@ export default class Main extends Component<MainProps, MainState> {
 		player: null,
 		test: null,
 		loading: true,
-		resources: {}
+		resources: {},
+		back: null
 	};
 
 	componentWillMount() {}
@@ -51,18 +54,26 @@ export default class Main extends Component<MainProps, MainState> {
 		});
 	};
 
-	entClick = entity => {
-		if (entity != this.state.player) {
-			this.state.player.pickUp(entity);
+	entClick = (entity, e) => {
+		if (entity instanceof Area) {
+			console.log(entity.containsPoint(new Point(e.x, e.y)));
+		}
+		if (entity == this.state.back) {
+			//this.state.player.pickUp(entity);
+			this.state.player.walkTo(e.x, e.y);
 		}
 	};
 
 	bgClick = e => {
-		this.state.player.walkTo(e.x, e.y);
+		//this.state.player.walkTo(e.x, e.y);
 	};
 
 	save = e => {
 		this.setState({ player: e });
+	};
+
+	bg = e => {
+		this.setState({ back: e });
 	};
 
 	finishedLoading = res => {
@@ -105,6 +116,14 @@ export default class Main extends Component<MainProps, MainState> {
 		const spr = this.state.sprite;
 		const test = this.state.test;
 		const entities = this.state.entities;
+		const pts = [
+			{ x: 10, y: 10 } as Point,
+			{ x: 100, y: 10 } as Point,
+			{ x: 50, y: 100 } as Point,
+			{ x: 100, y: 150 } as Point,
+			{ x: 50, y: 150 } as Point,
+			{ x: 15, y: 200 } as Point
+		];
 		if (this.state.loading) {
 			return <Loader resources={resources} finished={this.finishedLoading} />;
 		}
@@ -124,7 +143,13 @@ export default class Main extends Component<MainProps, MainState> {
 						sprite={spr.clone()}
 						position={new Point(300, 300)}
 					/>
-					<Item sprite={test} position={new Point(0, 0)} />
+					<Item
+						init={this.bg}
+						hitAccuracy={HitBox.Pixel}
+						sprite={test}
+						position={new Point(0, 0)}
+					/>
+					<Area points={pts} />
 				</Layer>
 			</Scene>
 		);

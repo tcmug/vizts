@@ -3,12 +3,18 @@ import { Point } from "../Point";
 import { Layer } from "./Layer";
 import * as Konva from "konva";
 
+export enum HitBox {
+	Box,
+	Pixel
+}
+
 export interface EntityProps {
 	position: Point;
 	layer?: Layer;
 	sprite?: Konva.Sprite;
 	init?: Function;
 	canPickup?: boolean;
+	hitAccuracy?: HitBox;
 }
 
 export interface EntityState {
@@ -18,6 +24,7 @@ export interface EntityState {
 	group: any;
 	target: Point;
 	speed: number;
+	hitAccuracy: HitBox;
 }
 
 let _id: number = 1;
@@ -29,7 +36,8 @@ export class Entity extends Component<EntityProps, EntityState> {
 		layer: null,
 		group: null,
 		target: null,
-		speed: 3
+		speed: 3,
+		hitAccuracy: HitBox.Box
 	};
 
 	constructor(props) {
@@ -37,7 +45,8 @@ export class Entity extends Component<EntityProps, EntityState> {
 		this.setState({
 			position: props.position,
 			id: _id,
-			layer: props.layer
+			layer: props.layer,
+			hitAccuracy: props.hitAccuracy
 		});
 		if (props.sprite) {
 			this.setState({ group: props.sprite });
@@ -65,10 +74,11 @@ export class Entity extends Component<EntityProps, EntityState> {
 			this.state.group.setX(pos.x).setY(pos.y);
 			if (this.state.group.start) {
 				this.state.group.start();
-			} else {
-				this.state.group.cache();
-				this.state.group.drawHitFromCache();
 			}
+		}
+		if (this.state.hitAccuracy == HitBox.Pixel) {
+			this.state.group.cache();
+			this.state.group.drawHitFromCache();
 		}
 		this.state.group.self = this;
 		this.state.layer.add(this.state.group);
