@@ -1,13 +1,16 @@
 import { h, Component } from "preact";
 import { Scene } from "./Scene";
 import * as Konva from "konva";
-import { Point } from "./Point";
+import { Point, PointList } from "./Point";
+import { render } from "preact-render-to-string";
 
 import Loader from "./Loader";
 import { Layer } from "./scene/Layer";
 import { Entity, HitBox } from "./scene/Entity";
 import { Item } from "./scene/Item";
 import { Area } from "./scene/Area";
+import { Line } from "./scene/Line";
+import { Polygon, shortestPathInPolygonList } from "./Polygon";
 
 export interface MainProps {}
 
@@ -27,6 +30,13 @@ interface MainState {
 	loading: any;
 	resources: any;
 	back: any;
+	p1: Point;
+	p2: Point;
+	which: any;
+	area: PointList;
+	path: PointList;
+	editPoints: PointList;
+	editing: boolean;
 }
 
 export default class Main extends Component<MainProps, MainState> {
@@ -39,10 +49,34 @@ export default class Main extends Component<MainProps, MainState> {
 		test: null,
 		loading: true,
 		resources: {},
-		back: null
+		back: null,
+		p1: new Point(70, 15),
+		p2: new Point(90, 95),
+		which: 1,
+		area: [],
+		path: [],
+		editPoints: [],
+		editing: true
 	};
 
-	componentWillMount() {}
+	componentWillMount() {
+		const pts = [
+			new Point(10, 10),
+			new Point(100, 10),
+			new Point(50, 30),
+			new Point(100, 50),
+			new Point(50, 70),
+			new Point(100, 80),
+			new Point(100, 100),
+			new Point(10, 100),
+			new Point(10, 70),
+			new Point(55, 60),
+			new Point(10, 50),
+			new Point(10, 10)
+		];
+		pts.map(pt => pt.mul(new Point(7, 7)));
+		this.setState({ area: pts });
+	}
 
 	updateFrame = (children: any, frame: any) => {
 		children = children.sort(
@@ -56,16 +90,46 @@ export default class Main extends Component<MainProps, MainState> {
 
 	entClick = (entity, e) => {
 		if (entity instanceof Area) {
-			console.log(entity.containsPoint(new Point(e.x, e.y)));
+			//console.log(entity.containsPoint(new Point(e.x, e.y)));
 		}
 		if (entity == this.state.back) {
 			//this.state.player.pickUp(entity);
-			this.state.player.walkTo(e.x, e.y);
+			//this.state.player.walkTo(e.x, e.y);
 		}
+
+		// if (this.state.which == 1) {
+		// 	this.setState({ p1: new Point(e.x, e.y), which: 2 });
+		// } else {
+		// 	this.setState({ p2: new Point(e.x, e.y), which: 1 });
+		// }
+		// const polygon = new Polygon(this.state.area);
+		// const path = [this.state.p1, this.state.p2];
+		// const polygonList = [polygon];
+		// this.setState({
+		// 	path: shortestPathInPolygonList(path[0], path[1], polygonList)
+		// });
 	};
 
 	bgClick = e => {
+		if (this.state.which == 1) {
+			this.setState({ p1: new Point(e.x, e.y), which: 2 });
+		} else {
+			this.setState({ p2: new Point(e.x, e.y), which: 1 });
+		}
+		// const polygon = new Polygon(this.state.area);
+		// const path = [this.state.p1, this.state.p2];
+		// const polygonList = [polygon];
+		// this.setState({
+		// 	path: shortestPathInPolygonList(path[0], path[1], polygonList)
+		// });
 		//this.state.player.walkTo(e.x, e.y);
+
+		if (this.state.editing) {
+			this.setState({
+				editPoints: [...this.state.editPoints, new Point(e.x, e.y)]
+			});
+			console.log(render(<Area points={this.state.editPoints} />));
+		}
 	};
 
 	save = e => {
@@ -116,14 +180,7 @@ export default class Main extends Component<MainProps, MainState> {
 		const spr = this.state.sprite;
 		const test = this.state.test;
 		const entities = this.state.entities;
-		const pts = [
-			{ x: 10, y: 10 } as Point,
-			{ x: 100, y: 10 } as Point,
-			{ x: 50, y: 100 } as Point,
-			{ x: 100, y: 150 } as Point,
-			{ x: 50, y: 150 } as Point,
-			{ x: 15, y: 200 } as Point
-		];
+
 		if (this.state.loading) {
 			return <Loader resources={resources} finished={this.finishedLoading} />;
 		}
@@ -149,7 +206,16 @@ export default class Main extends Component<MainProps, MainState> {
 						sprite={test}
 						position={new Point(0, 0)}
 					/>
-					<Area points={pts} />
+					<Line points={this.state.editPoints} />
+					<Area
+						points={[
+							new Point(615, 690),
+							new Point(658, 406),
+							new Point(509, 406),
+							new Point(731, 225),
+							new Point(697, 170)
+						]}
+					/>
 				</Layer>
 			</Scene>
 		);

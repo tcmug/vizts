@@ -111,6 +111,6 @@ export class Layer extends Component<LayerProps, LayerState> {
 	}
 
 	render(props) {
-		return <span class="layer">{this.renderChildren(props)}</span>;
+		return <ul class="layer">{this.renderChildren(props)}</ul>;
 	}
 }

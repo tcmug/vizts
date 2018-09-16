@@ -1,10 +1,17 @@
+
+type PointX = number[];
+
 export class Point {
 	x: number;
 	y: number;
+	totalDist: number;
+	prev;
 
 	constructor(x: number, y: number) {
 		this.x = x;
 		this.y = y;
+		this.totalDist = 0;
+		this.prev = 0;
 	}
 
 	add(other: Point) {

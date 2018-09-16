@@ -9,6 +9,6 @@
   },
   "include": [
     "src/*/*.ts",
-    "src/*/*.tsx"
+    "src/*/*.tsx", "src/client/scene/Line.tsx"
   ]
 }

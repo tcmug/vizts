@@ -57,7 +57,11 @@ export class Area extends Component<EntityProps, EntityState> {
 	}
 
 	render() {
-		return <span class="entity">LINES</span>;
+		const tag =
+			"<Area points={[" +
+			this.props.points.map(p => "new Point(" + p.x + ", " + p.y + ")") +
+			"]}/>";
+		return <span class="lines">{tag}</span>;
 	}
 
 	update() {}

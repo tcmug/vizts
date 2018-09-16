@@ -34,13 +34,6 @@ export class Polygon {
 
 export type PolygonList = Polygon[];
 
-export function shortestPathInPolygonList(
-	path: PointList,
-	polygons: PolygonList
-) {
-	return "heY";
-}
-
 export function pointInPolygonList(point: Point, polygons: PolygonList) {
 	var oddNodes = false;
 
@@ -75,16 +68,9 @@ export function lineInPolygonList(
 	endt: Point,
 	polygons: PolygonList
 ) {
-	// double start.x, double start.y, double testEX, double testEY, polySet allPolys) {
-	// double  theCos, theSin, dist, sX, sY, eX, eY, rotSX, rotSY, rotEX, rotEY, crossX ;
-	// int     i, j, polyI ;
-
 	var end = new Point(endt.x, endt.y);
 	end.sub(start);
 
-	// var end.x -= start.x;
-	// var end.y -= start.y;
-	// Math.sqrt(end.x*end.x+end.y*end.y);
 	var dist = end.length();
 	var theCos = end.x / dist;
 	var theSin = end.y / dist;
@@ -130,4 +116,77 @@ export function lineInPolygonList(
 		new Point(start.x + end.x / 2, start.y + end.y / 2),
 		polygons
 	);
+}
+
+export function shortestPathInPolygonList(
+	start: Point,
+	end: Point,
+	polygons: PolygonList
+): PointList {
+	if (
+		!pointInPolygonList(start, polygons) ||
+		!pointInPolygonList(end, polygons)
+	) {
+		return [];
+	}
+
+	//  If there is a straight-line solution, return with it immediately.
+	if (lineInPolygonList(start, end, polygons)) {
+		return [start, end];
+	}
+
+	var points: PointList = [start];
+	for (var polyI = 0; polyI < polygons.length; polyI++) {
+		for (var i = 0; i < polygons[polyI].points.length; i++) {
+			points.push(polygons[polyI].points[i]);
+		}
+	}
+	points.push(end);
+
+	var treeCount = 1;
+
+	var bestJ = 0;
+	var bestI = 0;
+	var bestDist: number = 0;
+	const INF: number = 999999;
+
+	while (bestJ < points.length - 1) {
+		bestDist = INF;
+		for (var i = 0; i < treeCount; i++) {
+			for (var j = treeCount; j < points.length; j++) {
+				if (lineInPolygonList(points[i], points[j], polygons)) {
+					var newDist = points[i].totalDist + points[i].distanceTo(points[j]);
+					if (newDist < bestDist) {
+						bestDist = newDist;
+						bestI = i;
+						bestJ = j;
+					}
+				}
+			}
+		}
+
+		if (bestDist == INF) {
+			console.log("inf");
+			return [];
+		}
+
+		points[bestJ].prev = bestI;
+		points[bestJ].totalDist = bestDist;
+
+		var temp = points[bestJ];
+		points[bestJ] = points[treeCount];
+		points[treeCount] = temp;
+
+		treeCount++;
+	}
+
+	var i = treeCount - 1;
+	var solution: PointList = [points[i]];
+
+	while (i > 0) {
+		i = points[i].prev;
+		solution.push(points[i]);
+	}
+
+	return solution.reverse();
 }

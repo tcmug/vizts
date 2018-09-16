@@ -11,6 +11,7 @@ const indexTemplate = path.resolve(__dirname, 'static') + "/index.html";
 const assetsPath    = path.resolve(__dirname, 'assets') + "/";
 
 const client = {
+		mode: 'development',
     devtool: 'source-map',
     entry: [
         './src/client/app',
@@ -33,11 +34,11 @@ const client = {
         //new UglifyJSPlugin()
     ],
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
-                loaders: ['ts-loader']
+                loader: ['ts-loader']
             },
             {
                 test: require.resolve('snapsvg'),
