@@ -1,14 +1,16 @@
 {
-  "compilerOptions": {
-    "sourceMap": true,
-    "module": "commonjs",
-    "jsx": "react",
-    "jsxFactory": "h",
-    "target": "es5",
-    "lib": ["es5", "es6", "dom"]
-  },
-  "include": [
-    "src/*/*.ts",
-    "src/*/*.tsx", "src/client/scene/Line.tsx"
-  ]
+	"compilerOptions": {
+		"sourceMap": true,
+		"module": "commonjs",
+		"jsx": "react",
+		"jsxFactory": "h",
+		"target": "es5",
+		"lib": ["es5", "es6", "dom"]
+	},
+	"include": [
+		"src/*/*.ts",
+		"src/*/*.tsx",
+		"src/client/scene/Line.tsx",
+		"src/client/components/ToolBar/index.tsx"
+	]
 }

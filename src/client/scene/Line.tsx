@@ -16,7 +16,7 @@ export interface EntityState {
 
 let _id: number = 1;
 
-export class Area extends Component<EntityProps, EntityState> {
+export class Line extends Component<EntityProps, EntityState> {
 	state = {
 		layer: null,
 		points: [],
@@ -32,6 +32,18 @@ export class Area extends Component<EntityProps, EntityState> {
 		_id = _id + 1;
 	}
 
+	componentWillReceiveProps(nextProps, nextState) {
+		if (this.state.group) {
+			this.state.group.points(
+				nextProps.points.reduce((r, e) => {
+					r.push(e.x, e.y);
+					return r;
+				}, [])
+			);
+			this.state.group.draw();
+		}
+	}
+
 	componentDidMount() {
 		let rect = new Konva.Line({
 			points: this.state.points.reduce((r, e) => {
@@ -39,10 +51,9 @@ export class Area extends Component<EntityProps, EntityState> {
 				return r;
 			}, []),
 			fill: "#00D2FF",
-			stroke: "black",
-			strokeWidth: 1,
-			opacity: 0.5,
-			closed: true
+			stroke: "red",
+			strokeWidth: 2,
+			opacity: 1
 		});
 		rect["self"] = this;
 		this.setState({
@@ -62,7 +73,7 @@ export class Area extends Component<EntityProps, EntityState> {
 		// 	"<Area points={[" +
 		// 	this.props.points.map(p => "new Point(" + p.x + ", " + p.y + ")") +
 		// 	"]}/>";
-		// return <span class="lines">{tag}</span>;
+		// return <li class="lines">{tag}</li>;
 	}
 
 	update() {}

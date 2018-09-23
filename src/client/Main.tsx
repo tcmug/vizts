@@ -5,6 +5,7 @@ import { Point, PointList } from "./Point";
 import { render } from "preact-render-to-string";
 
 import Loader from "./Loader";
+import { Toolbar, ToolbarItem } from "./components/Toolbar";
 import { Layer } from "./scene/Layer";
 import { Entity, HitBox } from "./scene/Entity";
 import { Item } from "./scene/Item";
@@ -25,6 +26,7 @@ var resources = {
 interface MainState {
 	sprite: any;
 	entities: any;
+	items: any;
 	player: any;
 	test: any;
 	loading: any;
@@ -45,6 +47,7 @@ export default class Main extends Component<MainProps, MainState> {
 	state = {
 		sprite: null,
 		entities: null,
+		items: [],
 		player: null,
 		test: null,
 		loading: true,
@@ -173,51 +176,87 @@ export default class Main extends Component<MainProps, MainState> {
 			x: 0,
 			y: 0
 		});
-		this.setState({ test: test, sprite: sprite, entities: [1, 2, 3] });
+		const spr = this.state.sprite;
+		this.setState({
+			test: test,
+			sprite: sprite,
+			entities: [
+				<Entity
+					sprite={sprite.clone()}
+					position={new Point(Math.random() * 200, Math.random() * 200)}
+				/>,
+				<Item
+					init={this.bg}
+					hitAccuracy={HitBox.Pixel}
+					sprite={sprite.clone()}
+					position={new Point(Math.random() * 200, Math.random() * 200)}
+				/>,
+				<Item
+					init={this.bg}
+					hitAccuracy={HitBox.Pixel}
+					sprite={sprite.clone()}
+					position={new Point(Math.random() * 200, Math.random() * 200)}
+				/>
+			]
+		});
 	};
 
-	render() {
-		const spr = this.state.sprite;
-		const test = this.state.test;
-		const entities = this.state.entities;
+	addEntity = (event: Event) => {
+		this.setState({
+			entities: [
+				...this.state.entities,
+				<Entity
+					sprite={this.state.sprite.clone()}
+					position={new Point(Math.random() * 200, Math.random() * 200)}
+				/>
+			]
+		});
+	};
 
+	addArea(event: Event) {
+		console.log("area");
+	}
+
+	render() {
 		if (this.state.loading) {
 			return <Loader resources={resources} finished={this.finishedLoading} />;
 		}
+		const entities = this.state.entities;
 		return (
-			<Scene entityClick={this.entClick} backgroundClick={this.bgClick}>
-				<Layer fps={30} frame={this.updateFrame} smoothing={false}>
-					{entities.map(entity => {
-						return (
-							<Entity
-								sprite={spr.clone()}
-								position={new Point(Math.random() * 200, Math.random() * 200)}
-							/>
-						);
-					})}
-					<Entity
-						init={this.save}
-						sprite={spr.clone()}
-						position={new Point(300, 300)}
-					/>
-					<Item
-						init={this.bg}
-						hitAccuracy={HitBox.Pixel}
-						sprite={test}
-						position={new Point(0, 0)}
-					/>
-					<Line points={this.state.editPoints} />
-					<Area
-						points={[
-							new Point(615, 690),
-							new Point(658, 406),
-							new Point(509, 406),
-							new Point(731, 225),
-							new Point(697, 170)
-						]}
-					/>
-				</Layer>
-			</Scene>
+			<div>
+				<Toolbar>
+					<ToolbarItem label="Add entity" action={this.addEntity} />
+					<ToolbarItem label="Add area" action={this.addArea} />
+				</Toolbar>
+				<Scene entityClick={this.entClick} backgroundClick={this.bgClick}>
+					<Layer fps={30} frame={this.updateFrame} smoothing={false}>
+						{entities}
+					</Layer>
+				</Scene>
+			</div>
 		);
 	}
-}
+} /*
+
+							<Entity
+							init={this.save}
+							sprite={spr.clone()}
+							position={new Point(300, 300)}
+						/>
+						<Item
+							init={this.bg}
+							hitAccuracy={HitBox.Pixel}
+							sprite={test}
+							position={new Point(0, 0)}
+						/>
+						<Line points={this.state.editPoints} />
+						<Area
+							points={[
+								new Point(615, 690),
+								new Point(658, 406),
+								new Point(509, 406),
+								new Point(731, 225),
+								new Point(697, 170)
+							]}
+						/>
+						*/
