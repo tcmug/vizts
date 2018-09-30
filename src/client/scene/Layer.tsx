@@ -6,16 +6,15 @@ export interface LayerProps {
 	fps?: number;
 	frame?: Function;
 	smoothing?: boolean;
+	perfect?: boolean;
 }
 
 interface LayerState {
 	layer: any;
 	stage: any;
-	fps: number;
 	frame: Function;
 	children: any;
 	animation: any;
-	smoothing: boolean;
 }
 
 export class Layer extends Component<LayerProps, LayerState> {
@@ -25,26 +24,28 @@ export class Layer extends Component<LayerProps, LayerState> {
 		fps: 0,
 		frame: null,
 		children: [],
-		animation: null,
-		smoothing: true
+		animation: null
 	};
+
+	static stg = 0;
 
 	constructor(props) {
 		super(props);
 		this.setState({
 			stage: props.stage,
-			frame: props.frame,
-			fps: props.fps,
-			smoothing: props.smoothing
+			frame: props.frame
 		});
 	}
 
-	componentDidMount() {
-		let layer = new Konva.Layer();
-		this.state.stage.add(layer);
+	refresh = () => {
+		const { layer } = this.state;
+
+		if (!this.props.perfect) {
+			layer.getCanvas().setPixelRatio(1);
+		}
 
 		// Hacky hack is hacky; access context of layer and set smoothing off.
-		if (!this.state.smoothing) {
+		if (!this.props.smoothing) {
 			let ctx = (layer as any).getContext()._context;
 			if ("imageSmoothingEnabled" in ctx) {
 				ctx.imageSmoothingEnabled = false;
@@ -53,13 +54,22 @@ export class Layer extends Component<LayerProps, LayerState> {
 				ctx.msImageSmoothingEnabled = false;
 			}
 		}
+	};
 
+	componentDidMount() {
+		let layer = new Konva.Layer();
+		this.state.stage.add(layer);
 		this.setState({ layer: layer });
-
+		this.state.layer.self = this;
 		if (this.state.frame) {
 			this.play();
 		}
+		this.refresh();
 	}
+
+	componentWillUnmount = () => {
+		this.state.layer.destroy();
+	};
 
 	play() {
 		if (this.state.animation) {
@@ -68,7 +78,6 @@ export class Layer extends Component<LayerProps, LayerState> {
 		}
 
 		let previous = 0;
-		let current = 0;
 		let passed = 0;
 		let ms_per_frame = 1000 / this.props.fps;
 		let self = this;
@@ -103,7 +112,8 @@ export class Layer extends Component<LayerProps, LayerState> {
 			return props.children.map(e => {
 				return cloneElement(e, {
 					layer: this.state.layer,
-					ref: ref => this.push(ref)
+					ref: ref => this.push(ref),
+					push: this.push
 				});
 			});
 		}

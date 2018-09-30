@@ -1,5 +1,7 @@
 import { h, Component, cloneElement } from "preact";
 import * as Konva from "konva";
+import { debounce } from "ts-debounce";
+import * as Markup from "preact-markup";
 
 export interface SceneProps {
 	entityClick?: Function;
@@ -15,30 +17,29 @@ export class Scene extends Component<SceneProps, SceneState> {
 		stage: null
 	};
 
-	sceneWrapper: any;
+	reference: any;
 
 	constructor(props) {
 		super(props);
 	}
 
 	fitToWindow = () => {
-		const width = this.sceneWrapper.offsetWidth;
-		const height = this.sceneWrapper.offsetHeight;
-
-		// this.state.stage.width(width);
-		this.state.stage.height(height);
+		const width = this.reference.offsetWidth;
+		const height = this.reference.offsetHeight;
+		this.state.stage.setWidth(width);
+		this.state.stage.setHeight(height);
+		this.state.stage.getLayers().forEach(l => l.self.refresh());
 	};
 
 	getStage = () => this.state.stage;
 
 	componentDidMount() {
-		//window.addEventListener("resize", this.fitToWindow);
+		window.addEventListener("resize", debounce(this.fitToWindow, 100));
 
-		let self = this;
 		const stage = new Konva.Stage({
 			container: "#World",
-			width: this.sceneWrapper.clientWidth,
-			height: this.sceneWrapper.clientHeight
+			width: this.reference.offsetWidth,
+			height: this.reference.offsetHeight
 		});
 
 		stage.on("click", e => {
@@ -59,14 +60,24 @@ export class Scene extends Component<SceneProps, SceneState> {
 		if (!this.state.stage) {
 			return null;
 		}
-		return props.children.map(e => {
-			return cloneElement(e, { stage: this.getStage() });
-		});
+		if (
+			props.children.filter(e => !(e.nodeName && e.nodeName.name === "Layer"))
+				.length > 0
+		) {
+			console.error(
+				"Non <Layer> components will not be rendered under <Stage>"
+			);
+		}
+		return props.children
+			.filter(e => e.nodeName && e.nodeName.name === "Layer")
+			.map(e => {
+				return cloneElement(e, { stage: this.getStage() });
+			});
 	}
 
 	render(props) {
 		return (
-			<div ref={sceneWrapper => (this.sceneWrapper = sceneWrapper)} id="World">
+			<div ref={e => (this.reference = e)} id="World">
 				{this.renderChildren(props)}
 			</div>
 		);

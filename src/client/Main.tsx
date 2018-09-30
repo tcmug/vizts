@@ -1,85 +1,89 @@
-import { h, Component } from "preact";
+import { h, Component, VNode } from "preact";
 import { Scene } from "./Scene";
-import * as Konva from "konva";
-import { Point, PointList } from "./Point";
-import { render } from "preact-render-to-string";
+import { Point, PointList } from "./lib/Point";
+// import * as Markup from "preact-markup";
 
-import Loader from "./Loader";
+import Loader from "./components/Loader";
 import { Toolbar, ToolbarItem } from "./components/Toolbar";
+import AreaBuilder from "./components/AreaBuilder";
+
 import { Layer } from "./scene/Layer";
-import { Entity, HitBox } from "./scene/Entity";
-import { Item } from "./scene/Item";
+import { Entity } from "./scene/Entity";
 import { Area } from "./scene/Area";
-import { Line } from "./scene/Line";
-import { Polygon, shortestPathInPolygonList } from "./Polygon";
-
-export interface MainProps {}
-
-let ontimg = new Image();
-let testimg = new Image();
+import { Sprite, SpriteSpecs, setResourceSource } from "./Resources";
 
 var resources = {
-	onti: require("../../assets/onti.png"),
-	backetest: require("../../assets/backtest.png")
+	onti: new Sprite({
+		image: require("../../assets/onti.png"),
+		animations: {
+			walkRight: [0, 0, 8, 8, 8, 0, 8, 8, 16, 0, 8, 8, 24, 0, 8, 8],
+			walkLeft: [0, 8, 8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 24, 8, 8, 8],
+			stand: [0, 16, 8, 8, 8, 16, 8, 8, 16, 16, 8, 8, 24, 16, 8, 8]
+		},
+		width: 64,
+		height: 64,
+		offsetX: 4,
+		offsetY: 8,
+		fps: 2
+	} as SpriteSpecs),
+	player: new Sprite({
+		image: require("../../assets/dude.png"),
+		animations: {
+			walkRight: [0, 0, 8, 8, 8, 0, 8, 8, 16, 0, 8, 8, 24, 0, 8, 8],
+			walkLeft: [0, 8, 8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 24, 8, 8, 8],
+			stand: [0, 16, 8, 8, 8, 16, 8, 8, 16, 16, 8, 8, 24, 16, 8, 8]
+		},
+		width: 64,
+		height: 64,
+		offsetX: 4,
+		offsetY: 8,
+		fps: 2
+	} as SpriteSpecs)
 };
 
+export enum MODE {
+	ZERO,
+	ADD_AREA
+}
+
+interface MainProps {}
 interface MainState {
-	sprite: any;
 	entities: any;
 	items: any;
-	player: any;
-	test: any;
 	loading: any;
 	resources: any;
-	back: any;
-	p1: Point;
-	p2: Point;
-	which: any;
-	area: PointList;
-	path: PointList;
-	editPoints: PointList;
-	editing: boolean;
+	mode: MODE;
+	editTools: Component[];
+	player: Entity;
+}
+
+function exportComponent(node) {
+	return {
+		name: (node.nodeName as any).name,
+		props: node.attributes
+	};
+}
+
+function importComponent({ name, props }) {
+	switch (name) {
+		case "Area":
+			return <Area {...props} />;
+		case "Entity":
+			return <Entity {...props} />;
+	}
+	return [];
 }
 
 export default class Main extends Component<MainProps, MainState> {
-	player: any;
-
 	state = {
-		sprite: null,
 		entities: null,
 		items: [],
-		player: null,
-		test: null,
 		loading: true,
 		resources: {},
-		back: null,
-		p1: new Point(70, 15),
-		p2: new Point(90, 95),
-		which: 1,
-		area: [],
-		path: [],
-		editPoints: [],
-		editing: true
+		mode: MODE.ZERO,
+		editTools: [],
+		player: null
 	};
-
-	componentWillMount() {
-		const pts = [
-			new Point(10, 10),
-			new Point(100, 10),
-			new Point(50, 30),
-			new Point(100, 50),
-			new Point(50, 70),
-			new Point(100, 80),
-			new Point(100, 100),
-			new Point(10, 100),
-			new Point(10, 70),
-			new Point(55, 60),
-			new Point(10, 50),
-			new Point(10, 10)
-		];
-		pts.map(pt => pt.mul(new Point(7, 7)));
-		this.setState({ area: pts });
-	}
 
 	updateFrame = (children: any, frame: any) => {
 		children = children.sort(
@@ -92,112 +96,26 @@ export default class Main extends Component<MainProps, MainState> {
 	};
 
 	entClick = (entity, e) => {
-		if (entity instanceof Area) {
-			//console.log(entity.containsPoint(new Point(e.x, e.y)));
-		}
-		if (entity == this.state.back) {
-			//this.state.player.pickUp(entity);
-			//this.state.player.walkTo(e.x, e.y);
-		}
-
-		// if (this.state.which == 1) {
-		// 	this.setState({ p1: new Point(e.x, e.y), which: 2 });
-		// } else {
-		// 	this.setState({ p2: new Point(e.x, e.y), which: 1 });
+		this.state.player.walkTo(e.x, e.y);
+		// if (entity instanceof Entity) {
+		// 	if (this.state.player) {
+		// 		entity.containsPoint());
+		// 	}
 		// }
-		// const polygon = new Polygon(this.state.area);
-		// const path = [this.state.p1, this.state.p2];
-		// const polygonList = [polygon];
-		// this.setState({
-		// 	path: shortestPathInPolygonList(path[0], path[1], polygonList)
-		// });
 	};
 
-	bgClick = e => {
-		if (this.state.which == 1) {
-			this.setState({ p1: new Point(e.x, e.y), which: 2 });
-		} else {
-			this.setState({ p2: new Point(e.x, e.y), which: 1 });
-		}
-		// const polygon = new Polygon(this.state.area);
-		// const path = [this.state.p1, this.state.p2];
-		// const polygonList = [polygon];
-		// this.setState({
-		// 	path: shortestPathInPolygonList(path[0], path[1], polygonList)
-		// });
-		//this.state.player.walkTo(e.x, e.y);
-
-		if (this.state.editing) {
-			this.setState({
-				editPoints: [...this.state.editPoints, new Point(e.x, e.y)]
-			});
-			console.log(render(<Area points={this.state.editPoints} />));
-		}
-	};
-
-	save = e => {
-		this.setState({ player: e });
-	};
-
-	bg = e => {
-		this.setState({ back: e });
-	};
+	bgClick = e => {};
 
 	finishedLoading = res => {
-		this.setState({ loading: false, resources: res });
-
-		const walkRight = [0, 0, 8, 8, 8, 0, 8, 8, 16, 0, 8, 8, 24, 0, 8, 8];
-		const walkLeft = [0, 8, 8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 24, 8, 8, 8];
-		const stand = [0, 16, 8, 8, 8, 16, 8, 8, 16, 16, 8, 8, 24, 16, 8, 8];
-		var sprite = new Konva.Sprite({
-			x: 0,
-			y: 0,
-			width: 64,
-			height: 64,
-			offsetX: 4,
-			offsetY: 8,
-			image: this.state.resources["onti"],
-			animation: "stand",
-			animations: {
-				walkRight: walkRight,
-				walkLeft: walkLeft,
-				stand: stand
-			},
-			frameRate: 2,
-			frameIndex: 0
-		} as Konva.SpriteConfig);
-		sprite.scaleX(3);
-		sprite.scaleY(3);
-		sprite.start();
-		var test = new Konva.Image({
-			image: this.state.resources["backetest"],
-			width: 640,
-			height: 480,
-			x: 0,
-			y: 0
-		});
-		const spr = this.state.sprite;
+		setResourceSource(res);
 		this.setState({
-			test: test,
-			sprite: sprite,
-			entities: [
-				<Entity
-					sprite={sprite.clone()}
-					position={new Point(Math.random() * 200, Math.random() * 200)}
-				/>,
-				<Item
-					init={this.bg}
-					hitAccuracy={HitBox.Pixel}
-					sprite={sprite.clone()}
-					position={new Point(Math.random() * 200, Math.random() * 200)}
-				/>,
-				<Item
-					init={this.bg}
-					hitAccuracy={HitBox.Pixel}
-					sprite={sprite.clone()}
-					position={new Point(Math.random() * 200, Math.random() * 200)}
-				/>
-			]
+			loading: false,
+			resources: res
+		});
+		let save = localStorage.getItem("test");
+		const ents = save ? JSON.parse(save).map(e => importComponent(e)) : [];
+		this.setState({
+			entities: ents
 		});
 	};
 
@@ -206,57 +124,86 @@ export default class Main extends Component<MainProps, MainState> {
 			entities: [
 				...this.state.entities,
 				<Entity
-					sprite={this.state.sprite.clone()}
-					position={new Point(Math.random() * 200, Math.random() * 200)}
+					sprite="onti"
+					position={
+						new Point(Math.random() * 200, Math.random() * 200)
+					}
 				/>
 			]
 		});
 	};
 
-	addArea(event: Event) {
-		console.log("area");
-	}
+	finishArea = ({ points }) => {
+		this.setState({
+			entities: [...this.state.entities, <Area points={points} />]
+		});
+		const exp = this.state.entities.map((node: VNode) => {
+			return exportComponent(node);
+		});
+		localStorage.setItem("test", JSON.stringify(exp));
+		this.setState({ editTools: [] });
+	};
+
+	addArea = (event: Event) => {
+		this.setState({
+			editTools: [
+				...this.state.editTools,
+				<AreaBuilder finish={this.finishArea} />
+			]
+		});
+	};
 
 	render() {
-		if (this.state.loading) {
-			return <Loader resources={resources} finished={this.finishedLoading} />;
+		const { loading, entities, editTools } = this.state;
+		if (loading) {
+			return (
+				<Loader resources={resources} finished={this.finishedLoading} />
+			);
+			/* <Entity sprite="onti" position={new Point(200, 200)} /> */
 		}
-		const entities = this.state.entities;
 		return (
 			<div>
 				<Toolbar>
 					<ToolbarItem label="Add entity" action={this.addEntity} />
 					<ToolbarItem label="Add area" action={this.addArea} />
 				</Toolbar>
-				<Scene entityClick={this.entClick} backgroundClick={this.bgClick}>
-					<Layer fps={30} frame={this.updateFrame} smoothing={false}>
+				<Scene
+					entityClick={this.entClick}
+					backgroundClick={this.bgClick}
+				>
+					<Layer
+						perfect={true}
+						fps={30}
+						frame={this.updateFrame}
+						smoothing={false}
+					>
 						{entities}
+						<Area
+							points={[
+								new Point(40, 40),
+								new Point(400, 40),
+								new Point(400, 100),
+								new Point(200, 100),
+								new Point(200, 200),
+								new Point(400, 200),
+								new Point(400, 400),
+								new Point(40, 400)
+							]}
+						>
+							<Entity
+								save={e => this.setState({ player: e })}
+								sprite="onti"
+								position={new Point(100, 120)}
+							/>
+						</Area>
 					</Layer>
+					{editTools.length > 0 ? (
+						<Layer perfect={true}>{editTools}</Layer>
+					) : (
+						[]
+					)}
 				</Scene>
 			</div>
 		);
 	}
-} /*
-
-							<Entity
-							init={this.save}
-							sprite={spr.clone()}
-							position={new Point(300, 300)}
-						/>
-						<Item
-							init={this.bg}
-							hitAccuracy={HitBox.Pixel}
-							sprite={test}
-							position={new Point(0, 0)}
-						/>
-						<Line points={this.state.editPoints} />
-						<Area
-							points={[
-								new Point(615, 690),
-								new Point(658, 406),
-								new Point(509, 406),
-								new Point(731, 225),
-								new Point(697, 170)
-							]}
-						/>
-						*/
+}

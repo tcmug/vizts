@@ -1,7 +1,10 @@
 import { h, Component } from "preact";
-import { Point } from "../Point";
+import { Point, PointList } from "../lib/Point";
 import { Layer } from "./Layer";
+import { Area } from "./Area";
 import * as Konva from "konva";
+
+import { getResourceByName } from "../Resources";
 
 export enum HitBox {
 	Box,
@@ -11,10 +14,12 @@ export enum HitBox {
 export interface EntityProps {
 	position: Point;
 	layer?: Layer;
-	sprite?: Konva.Sprite;
+	sprite?: string;
 	init?: Function;
 	canPickup?: boolean;
 	hitAccuracy?: HitBox;
+	save?: Function;
+	area?: Area;
 }
 
 export interface EntityState {
@@ -25,6 +30,8 @@ export interface EntityState {
 	target: Point;
 	speed: number;
 	hitAccuracy: HitBox;
+	path: PointList;
+	drawnPath?: Konva.Line;
 }
 
 let _id: number = 1;
@@ -36,8 +43,10 @@ export class Entity extends Component<EntityProps, EntityState> {
 		layer: null,
 		group: null,
 		target: null,
-		speed: 3,
-		hitAccuracy: HitBox.Box
+		speed: 1,
+		hitAccuracy: HitBox.Box,
+		path: [],
+		drawnPath: null
 	};
 
 	constructor(props) {
@@ -49,9 +58,12 @@ export class Entity extends Component<EntityProps, EntityState> {
 			hitAccuracy: props.hitAccuracy
 		});
 		if (props.sprite) {
-			this.setState({ group: props.sprite });
+			this.setState({
+				group: getResourceByName(props.sprite).konvaSprite.clone()
+			});
 		}
 		_id = _id + 1;
+		if (this.props.save) this.props.save(this);
 	}
 
 	componentDidMount() {
@@ -87,6 +99,13 @@ export class Entity extends Component<EntityProps, EntityState> {
 		}
 	}
 
+	componentWillUnmount = () => {
+		this.state.group.destroy();
+		if (this.state.drawnPath) {
+			this.state.drawnPath.destroy();
+		}
+	};
+
 	render() {
 		return (
 			<span class="entity">
@@ -99,13 +118,23 @@ export class Entity extends Component<EntityProps, EntityState> {
 	/******/
 
 	public walkTo = (x: number, y: number) => {
+		if (this.props.area) {
+			this.setState({
+				path: this.props.area.pathBetween(
+					this.state.position,
+					new Point(x, y)
+				)
+			});
+			this.displayPath();
+			this.setState({ target: this.state.path.shift() });
+		} else {
+			this.setState({ target: new Point(x, y) });
+		}
 		if (x > this.state.group.getX()) {
 			this.state.group.animation("walkRight");
 		} else {
 			this.state.group.animation("walkLeft");
 		}
-		//this.state.group.start();
-		this.setState({ target: new Point(x, y) });
 	};
 
 	reachTarget() {
@@ -115,11 +144,33 @@ export class Entity extends Component<EntityProps, EntityState> {
 
 	setPosition(point: Point) {
 		this.setState({ position: point });
-		this.state.group.setX(this.state.position.x).setY(this.state.position.y);
+		this.state.group
+			.setX(this.state.position.x)
+			.setY(this.state.position.y);
 	}
 
 	pickUp(item: Entity) {
 		item.state.group.hide();
+	}
+
+	displayPath() {
+		if (this.state.drawnPath) {
+			this.state.drawnPath.destroy();
+		}
+		let path = new Konva.Line({
+			points: this.state.path.reduce((r, e) => {
+				r.push(e.x, e.y);
+				return r;
+			}, []),
+			fill: "#00D2FF",
+			stroke: "red",
+			strokeWidth: 2,
+			opacity: 1
+		});
+		this.setState({
+			drawnPath: path
+		});
+		this.state.layer.add(this.state.drawnPath);
 	}
 
 	update() {
@@ -137,7 +188,11 @@ export class Entity extends Component<EntityProps, EntityState> {
 			point.add(this.state.position);
 			this.setPosition(point);
 		} else {
-			this.reachTarget();
+			if (this.state.path.length > 0) {
+				this.setState({ target: this.state.path.shift() });
+			} else {
+				this.reachTarget();
+			}
 		}
 	}
 }

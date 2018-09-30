@@ -1,8 +1,7 @@
 import { h, Component } from "preact";
-import { Point, PointList } from "../Point";
-import { Layer } from "./Layer";
+import { Point, PointList } from "../lib/Point";
 import * as Konva from "konva";
-import { Polygon } from "../Polygon";
+import { Polygon } from "../lib/Polygon";
 
 export interface EntityProps {
 	points: PointList;
@@ -62,13 +61,17 @@ export class Line extends Component<EntityProps, EntityState> {
 		this.state.layer.add(this.state.group);
 	}
 
+	componentWillUnmount = () => {
+		this.state.group.destroy();
+	};
+
 	containsPoint(pt: Point) {
 		const poly = new Polygon(this.state.points);
 		return poly.containsPoint(pt);
 	}
 
 	render() {
-		return "";
+		return <span class="entity">#TOOL</span>;
 		// const tag =
 		// 	"<Area points={[" +
 		// 	this.props.points.map(p => "new Point(" + p.x + ", " + p.y + ")") +

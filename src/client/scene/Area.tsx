@@ -1,15 +1,16 @@
-import { h, Component } from "preact";
-import { Point, PointList } from "../Point";
-import { Layer } from "./Layer";
+import { h, Component, cloneElement } from "preact";
 import * as Konva from "konva";
-import { Polygon } from "../Polygon";
+
+import { Point, PointList } from "../lib/Point";
+import { Polygon, shortestPathInPolygonList } from "../lib/Polygon";
 
 export interface EntityProps {
 	points: PointList;
+	layer?: Konva.Layer;
+	push?: Function;
 }
 
 export interface EntityState {
-	layer: any;
 	points: PointList;
 	group: any;
 }
@@ -18,7 +19,6 @@ let _id: number = 1;
 
 export class Area extends Component<EntityProps, EntityState> {
 	state = {
-		layer: null,
 		points: [],
 		group: null
 	};
@@ -26,7 +26,6 @@ export class Area extends Component<EntityProps, EntityState> {
 	constructor(props) {
 		super(props);
 		this.setState({
-			layer: props.layer,
 			points: props.points
 		});
 		_id = _id + 1;
@@ -41,14 +40,14 @@ export class Area extends Component<EntityProps, EntityState> {
 			fill: "#00D2FF",
 			stroke: "black",
 			strokeWidth: 1,
-			opacity: 0.5,
+			opacity: 0.2,
 			closed: true
 		});
 		rect["self"] = this;
 		this.setState({
 			group: rect
 		});
-		this.state.layer.add(this.state.group);
+		this.props.layer.add(this.state.group);
 	}
 
 	containsPoint(pt: Point) {
@@ -56,13 +55,23 @@ export class Area extends Component<EntityProps, EntityState> {
 		return poly.containsPoint(pt);
 	}
 
-	render() {
-		return "";
-		// const tag =
-		// 	"<Area points={[" +
-		// 	this.props.points.map(p => "new Point(" + p.x + ", " + p.y + ")") +
-		// 	"]}/>";
-		// return <span class="lines">{tag}</span>;
+	pathBetween(start: Point, end: Point) {
+		const poly = new Polygon(this.state.points);
+		return shortestPathInPolygonList(start, end, [poly]);
+	}
+
+	renderChildren(props) {
+		return props.children.map(e => {
+			return cloneElement(e, {
+				layer: this.props.layer,
+				area: this,
+				ref: ref => this.props.push(ref)
+			});
+		});
+	}
+
+	render(props) {
+		return <span class="Area">{this.renderChildren(props)}</span>;
 	}
 
 	update() {}
