@@ -1,5 +1,4 @@
 import { h, Component } from "preact";
-import Main from "../../Main";
 
 interface LoaderProps {
 	resources: {};
@@ -32,11 +31,11 @@ export default class Loader extends Component<LoaderProps, LoaderState> {
 			toLoad: Object.keys(this.props.resources).length
 		});
 		Object.keys(this.props.resources).map(name => {
-			this.load(this.props.resources[name]);
+			this.load((this.props.resources as any)[name]);
 		});
 	}
 
-	render({}, { loaded, toLoad }) {
+	render({}, { loaded, toLoad }: { loaded: number; toLoad: number }) {
 		const progress = Math.ceil((loaded / toLoad) * 100);
 		return (
 			<div class="loader">

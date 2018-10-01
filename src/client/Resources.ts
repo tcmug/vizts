@@ -1,6 +1,6 @@
 import * as Konva from "konva";
 
-let resources: {};
+let resources: Object = {};
 
 export interface SpriteSpecs {
 	image: string;
@@ -14,7 +14,7 @@ export interface SpriteSpecs {
 
 export class Resource {
 	consctructor() {}
-	async load() {
+	async load(): Promise<any> {
 		return null;
 	}
 }
@@ -56,10 +56,10 @@ export class Sprite extends Resource {
 	}
 }
 
-export function setResourceSource(resourceSource: {}) {
+export function setResourceSource(resourceSource: Object) {
 	resources = resourceSource;
 }
 
-export function getResourceByName(name: string) {
-	return resources[name];
+export function getResourceByName(name: string): Resource {
+	return (resources as any)[name] as Resource;
 }

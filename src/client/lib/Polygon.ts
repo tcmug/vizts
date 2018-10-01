@@ -145,12 +145,12 @@ export function shortestPathInPolygonList(
 		}
 	}
 	points.push(end);
-	let totalDist = [];
-	let prevList = [];
+	let totalDist: Array<number> = [];
+	let prevList: Array<number> = [];
 
 	for (let i = 0; i < points.length; i++) {
 		totalDist.push(0);
-		prevList.push(null);
+		prevList.push(-1);
 	}
 
 	let treeCount = 1;
@@ -188,22 +188,19 @@ export function shortestPathInPolygonList(
 		points[bestJ] = points[treeCount];
 		points[treeCount] = temp;
 
-		temp = prevList[bestJ];
+		let temp2 = prevList[bestJ];
 		prevList[bestJ] = prevList[treeCount];
-		prevList[treeCount] = temp;
+		prevList[treeCount] = temp2;
 
-		temp = totalDist[bestJ];
+		let temp3 = totalDist[bestJ];
 		totalDist[bestJ] = totalDist[treeCount];
-		totalDist[treeCount] = temp;
+		totalDist[treeCount] = temp3;
 
 		treeCount++;
 	}
 
 	let i = treeCount - 1;
 	let solution: PointList = [points[i]];
-
-	console.log("solution?", points, totalDist, treeCount - 1);
-	console.log(prevList);
 
 	while (i > 0) {
 		i = prevList[i];

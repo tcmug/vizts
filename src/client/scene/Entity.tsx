@@ -1,10 +1,10 @@
 import { h, Component } from "preact";
+import * as Konva from "konva";
+
 import { Point, PointList } from "../lib/Point";
 import { Layer } from "./Layer";
 import { Area } from "./Area";
-import * as Konva from "konva";
-
-import { getResourceByName } from "../Resources";
+import { getResourceByName, Sprite } from "../Resources";
 
 export enum HitBox {
 	Box,
@@ -25,7 +25,6 @@ export interface EntityProps {
 export interface EntityState {
 	id: number;
 	position: Point;
-	layer: Layer;
 	group: any;
 	target: Point;
 	speed: number;
@@ -40,26 +39,26 @@ export class Entity extends Component<EntityProps, EntityState> {
 	state = {
 		id: -1,
 		position: null,
-		layer: null,
 		group: null,
 		target: null,
 		speed: 1,
 		hitAccuracy: HitBox.Box,
 		path: [],
 		drawnPath: null
-	};
+	} as EntityState;
 
-	constructor(props) {
+	constructor(props: any) {
 		super(props);
 		this.setState({
 			position: props.position,
 			id: _id,
-			layer: props.layer,
 			hitAccuracy: props.hitAccuracy
 		});
 		if (props.sprite) {
 			this.setState({
-				group: getResourceByName(props.sprite).konvaSprite.clone()
+				group: (getResourceByName(
+					props.sprite
+				) as Sprite).konvaSprite.clone()
 			});
 		}
 		_id = _id + 1;
@@ -77,7 +76,8 @@ export class Entity extends Component<EntityProps, EntityState> {
 				height: 5,
 				fill: "red",
 				stroke: "black",
-				strokeWidth: 2
+				strokeWidth: 2,
+				draggable: true
 			});
 			this.setState({
 				group: rect
@@ -93,7 +93,7 @@ export class Entity extends Component<EntityProps, EntityState> {
 			this.state.group.drawHitFromCache();
 		}
 		this.state.group.self = this;
-		this.state.layer.add(this.state.group);
+		this.props.layer.getLayer().add(this.state.group);
 		if (this.props.init) {
 			this.props.init(this);
 		}
@@ -130,7 +130,7 @@ export class Entity extends Component<EntityProps, EntityState> {
 		} else {
 			this.setState({ target: new Point(x, y) });
 		}
-		if (x > this.state.group.getX()) {
+		if (this.state.target.x > this.state.group.getX()) {
 			this.state.group.animation("walkRight");
 		} else {
 			this.state.group.animation("walkLeft");
@@ -170,7 +170,7 @@ export class Entity extends Component<EntityProps, EntityState> {
 		this.setState({
 			drawnPath: path
 		});
-		this.state.layer.add(this.state.drawnPath);
+		this.props.layer.getLayer().add(this.state.drawnPath);
 	}
 
 	update() {
@@ -179,6 +179,7 @@ export class Entity extends Component<EntityProps, EntityState> {
 		}
 		const target = this.state.target;
 		let distance = target.distanceTo(this.state.position);
+
 		if (distance > 3) {
 			let point = new Point(
 				(target.x - this.state.group.getX()) / distance,
@@ -190,6 +191,11 @@ export class Entity extends Component<EntityProps, EntityState> {
 		} else {
 			if (this.state.path.length > 0) {
 				this.setState({ target: this.state.path.shift() });
+				if (this.state.target.x > this.state.group.getX()) {
+					this.state.group.animation("walkRight");
+				} else {
+					this.state.group.animation("walkLeft");
+				}
 			} else {
 				this.reachTarget();
 			}

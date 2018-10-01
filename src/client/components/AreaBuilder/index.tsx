@@ -15,7 +15,7 @@ class VKonva extends Konva.Rect {
 
 export interface AreaBuilderState {
 	layer: any;
-	group: VKonva;
+	group: Konva.Node;
 	area: any;
 	points: PointList;
 }
@@ -29,9 +29,9 @@ export default class AreaBuilder extends Component<
 		group: null,
 		area: null,
 		points: []
-	};
+	} as AreaBuilderState;
 
-	constructor(props) {
+	constructor(props: any) {
 		super(props);
 		this.setState({
 			layer: props.layer
@@ -43,7 +43,7 @@ export default class AreaBuilder extends Component<
 			height: this.state.layer.getHeight(),
 			fill: "red",
 			opacity: 0.2
-		});
+		}) as any;
 		rect["self"] = this;
 		this.setState({
 			group: rect as VKonva
@@ -89,8 +89,8 @@ export default class AreaBuilder extends Component<
 	};
 
 	fitToWindow = () => {
-		this.state.group.setWidth(this.state.layer.getWidth());
-		this.state.group.setHeight(this.state.layer.getHeight());
+		//this.state.group.setWidth(this.state.layer.getWidth());
+		//this.state.group.setHeight(this.state.layer.getHeight());
 		this.state.layer.draw();
 	};
 

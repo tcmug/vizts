@@ -1,12 +1,11 @@
 import { expect } from "chai";
-import { Point, PointList } from "../src/client/Point";
+import { Point } from "../src/client/lib/Point";
 import {
 	Polygon,
-	PolygonList,
 	shortestPathInPolygonList,
 	pointInPolygonList,
 	lineInPolygonList
-} from "../src/client/Polygon";
+} from "../src/client/lib/Polygon";
 
 // if you used the '@types/mocha' method to install mocha type definitions, uncomment the following line
 // import 'mocha';
@@ -40,13 +39,19 @@ describe("A polygon", () => {
 		expect(pointInPolygonList(path[0], polygonList)).to.equal(true);
 	});
 	it("is not within this huge polygon set", () => {
-		expect(pointInPolygonList(path[0], polygonListCapsulated)).to.equal(false);
+		expect(pointInPolygonList(path[0], polygonListCapsulated)).to.equal(
+			false
+		);
 	});
 	it("does not contain this path", () => {
-		expect(lineInPolygonList(path[0], path[1], polygonList)).to.equal(false);
+		expect(lineInPolygonList(path[0], path[1], polygonList)).to.equal(
+			false
+		);
 	});
 	it("contains this path", () => {
-		expect(lineInPolygonList(path2[0], path2[1], polygonList)).to.equal(true);
+		expect(lineInPolygonList(path2[0], path2[1], polygonList)).to.equal(
+			true
+		);
 	});
 	it("should have this shortest path", () => {
 		console.log(shortestPathInPolygonList(path[0], path[1], polygonList));

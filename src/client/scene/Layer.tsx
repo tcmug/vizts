@@ -1,8 +1,9 @@
 import { h, Component, cloneElement } from "preact";
 import * as Konva from "konva";
+import { Scene } from "../Scene";
 
 export interface LayerProps {
-	stage?: any;
+	scene?: Scene;
 	fps?: number;
 	frame?: Function;
 	smoothing?: boolean;
@@ -11,7 +12,6 @@ export interface LayerProps {
 
 interface LayerState {
 	layer: any;
-	stage: any;
 	frame: Function;
 	children: any;
 	animation: any;
@@ -20,19 +20,18 @@ interface LayerState {
 export class Layer extends Component<LayerProps, LayerState> {
 	state = {
 		layer: null,
-		stage: null,
+		scene: null,
 		fps: 0,
 		frame: null,
 		children: [],
 		animation: null
-	};
+	} as LayerState;
 
 	static stg = 0;
 
-	constructor(props) {
+	constructor(props: any) {
 		super(props);
 		this.setState({
-			stage: props.stage,
 			frame: props.frame
 		});
 	}
@@ -56,9 +55,11 @@ export class Layer extends Component<LayerProps, LayerState> {
 		}
 	};
 
+	getLayer = () => this.state.layer;
+
 	componentDidMount() {
 		let layer = new Konva.Layer();
-		this.state.stage.add(layer);
+		this.props.scene.getStage().add(layer);
 		this.setState({ layer: layer });
 		this.state.layer.self = this;
 		if (this.state.frame) {
@@ -82,7 +83,7 @@ export class Layer extends Component<LayerProps, LayerState> {
 		let ms_per_frame = 1000 / this.props.fps;
 		let self = this;
 
-		let anim = new Konva.Animation(frame => {
+		let anim = new Konva.Animation((frame: any) => {
 			passed += frame.time - previous;
 			previous = frame.time;
 			if (passed < ms_per_frame) {
@@ -103,16 +104,16 @@ export class Layer extends Component<LayerProps, LayerState> {
 		if (this.state.animation) this.state.animation.stop();
 	}
 
-	push = ref => {
+	push = (ref: any) => {
 		this.state.children.push(ref);
 	};
 
-	renderChildren(props) {
+	renderChildren(children: []) {
 		if (this.state.layer) {
-			return props.children.map(e => {
+			return children.map((e: any) => {
 				return cloneElement(e, {
-					layer: this.state.layer,
-					ref: ref => this.push(ref),
+					layer: this,
+					ref: (ref: any) => this.push(ref),
 					push: this.push
 				});
 			});
@@ -120,7 +121,7 @@ export class Layer extends Component<LayerProps, LayerState> {
 		return null;
 	}
 
-	render(props) {
-		return <ul class="layer">{this.renderChildren(props)}</ul>;
+	render(props: any) {
+		return <ul class="layer">{this.renderChildren(props.children)}</ul>;
 	}
 }

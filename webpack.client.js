@@ -1,7 +1,5 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const FilePlugin = require("file-loader");
-const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 
 const publicPath = "";
 const distPath = path.resolve(__dirname, "dist") + "/client/";
@@ -9,7 +7,6 @@ const indexTemplate = path.resolve(__dirname, "static") + "/index.html";
 const assetsPath = path.resolve(__dirname, "assets") + "/";
 
 const client = {
-	mode: "development",
 	devtool: "source-map",
 	entry: ["./src/client/index"],
 	output: {

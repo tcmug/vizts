@@ -50,21 +50,21 @@ interface MainProps {}
 interface MainState {
 	entities: any;
 	items: any;
-	loading: any;
-	resources: any;
+	loading: boolean;
+	resources: Object;
 	mode: MODE;
-	editTools: Component[];
-	player: Entity;
+	editTools: any;
+	player?: Entity;
 }
 
-function exportComponent(node) {
+function exportComponent(node: VNode) {
 	return {
 		name: (node.nodeName as any).name,
 		props: node.attributes
 	};
 }
 
-function importComponent({ name, props }) {
+function importComponent({ name, props }: { name: string; props: any }): any {
 	switch (name) {
 		case "Area":
 			return <Area {...props} />;
@@ -76,14 +76,14 @@ function importComponent({ name, props }) {
 
 export default class Main extends Component<MainProps, MainState> {
 	state = {
-		entities: null,
-		items: [],
+		entities: new Array(),
+		items: new Array(),
 		loading: true,
 		resources: {},
 		mode: MODE.ZERO,
-		editTools: [],
+		editTools: new Array(),
 		player: null
-	};
+	} as MainState;
 
 	updateFrame = (children: any, frame: any) => {
 		children = children.sort(
@@ -95,7 +95,7 @@ export default class Main extends Component<MainProps, MainState> {
 		});
 	};
 
-	entClick = (entity, e) => {
+	entClick = (entity: Entity, e: any) => {
 		this.state.player.walkTo(e.x, e.y);
 		// if (entity instanceof Entity) {
 		// 	if (this.state.player) {
@@ -104,16 +104,18 @@ export default class Main extends Component<MainProps, MainState> {
 		// }
 	};
 
-	bgClick = e => {};
+	bgClick = (e: any) => {};
 
-	finishedLoading = res => {
+	finishedLoading = (res: any) => {
 		setResourceSource(res);
 		this.setState({
 			loading: false,
 			resources: res
 		});
 		let save = localStorage.getItem("test");
-		const ents = save ? JSON.parse(save).map(e => importComponent(e)) : [];
+		const ents = save
+			? JSON.parse(save).map((e: any) => importComponent(e))
+			: [];
 		this.setState({
 			entities: ents
 		});
@@ -133,7 +135,7 @@ export default class Main extends Component<MainProps, MainState> {
 		});
 	};
 
-	finishArea = ({ points }) => {
+	finishArea = ({ points }: { points: PointList }) => {
 		this.setState({
 			entities: [...this.state.entities, <Area points={points} />]
 		});
@@ -172,7 +174,7 @@ export default class Main extends Component<MainProps, MainState> {
 					backgroundClick={this.bgClick}
 				>
 					<Layer
-						perfect={true}
+						perfect={false}
 						fps={30}
 						frame={this.updateFrame}
 						smoothing={false}
@@ -186,19 +188,30 @@ export default class Main extends Component<MainProps, MainState> {
 								new Point(200, 100),
 								new Point(200, 200),
 								new Point(400, 200),
+
+								new Point(400, 300),
+								new Point(500, 300),
+								new Point(500, 200),
+								new Point(550, 200),
+								new Point(550, 350),
+								new Point(500, 350),
+								new Point(400, 350),
+
 								new Point(400, 400),
 								new Point(40, 400)
 							]}
 						>
 							<Entity
-								save={e => this.setState({ player: e })}
+								save={(e: Entity) =>
+									this.setState({ player: e })
+								}
 								sprite="onti"
 								position={new Point(100, 120)}
 							/>
 						</Area>
 					</Layer>
 					{editTools.length > 0 ? (
-						<Layer perfect={true}>{editTools}</Layer>
+						<Layer perfect={false}>{editTools}</Layer>
 					) : (
 						[]
 					)}

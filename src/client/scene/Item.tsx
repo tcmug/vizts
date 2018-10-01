@@ -1,4 +1,4 @@
-import { Entity, EntityState, EntityProps } from "./Entity";
+import { Entity } from "./Entity";
 
 export class Item extends Entity {
 	constructor(props) {

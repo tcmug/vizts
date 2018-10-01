@@ -1,7 +1,6 @@
 import { h, Component, cloneElement } from "preact";
 import * as Konva from "konva";
 import { debounce } from "ts-debounce";
-import * as Markup from "preact-markup";
 
 export interface SceneProps {
 	entityClick?: Function;
@@ -9,17 +8,17 @@ export interface SceneProps {
 }
 
 interface SceneState {
-	stage: any;
+	stage: Konva.Stage | null;
 }
 
 export class Scene extends Component<SceneProps, SceneState> {
 	state = {
 		stage: null
-	};
+	} as SceneState;
 
 	reference: any;
 
-	constructor(props) {
+	constructor(props: any) {
 		super(props);
 	}
 
@@ -28,7 +27,7 @@ export class Scene extends Component<SceneProps, SceneState> {
 		const height = this.reference.offsetHeight;
 		this.state.stage.setWidth(width);
 		this.state.stage.setHeight(height);
-		this.state.stage.getLayers().forEach(l => l.self.refresh());
+		this.state.stage.getLayers().forEach((l: any) => l.self.refresh());
 	};
 
 	getStage = () => this.state.stage;
@@ -56,26 +55,29 @@ export class Scene extends Component<SceneProps, SceneState> {
 		});
 	}
 
-	renderChildren(props) {
+	renderChildren(props: any) {
 		if (!this.state.stage) {
 			return null;
 		}
 		if (
-			props.children.filter(e => !(e.nodeName && e.nodeName.name === "Layer"))
-				.length > 0
+			props.children.filter(
+				(e: any) => !(e.nodeName && e.nodeName.name === "Layer")
+			).length > 0
 		) {
 			console.error(
 				"Non <Layer> components will not be rendered under <Stage>"
 			);
 		}
 		return props.children
-			.filter(e => e.nodeName && e.nodeName.name === "Layer")
-			.map(e => {
-				return cloneElement(e, { stage: this.getStage() });
+			.filter((e: any) => e.nodeName && e.nodeName.name === "Layer")
+			.map((e: any) => {
+				return cloneElement(e, {
+					scene: this
+				});
 			});
 	}
 
-	render(props) {
+	render(props: Object) {
 		return (
 			<div ref={e => (this.reference = e)} id="World">
 				{this.renderChildren(props)}

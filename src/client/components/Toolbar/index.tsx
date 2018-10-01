@@ -1,4 +1,4 @@
-import { h, Component, cloneElement } from "preact";
+import { h, Component } from "preact";
 
 export interface ToolbarProps {}
 export interface ToolbarState {
@@ -14,7 +14,7 @@ export interface ToolbarItemState {}
 import "./style.sss";
 
 export class ToolbarItem extends Component<ToolbarItemProps, ToolbarItemState> {
-	render({ action, label }) {
+	render({ action, label }: { action: Function; label: string }) {
 		return <li onClick={event => action(event)}>{label}</li>;
 	}
 }
@@ -29,7 +29,7 @@ export class Toolbar extends Component<ToolbarProps, ToolbarState> {
 		e.preventDefault();
 	};
 
-	render({ children }) {
+	render({ children }: { children: [] }) {
 		let classes: string[] = ["toolbar"];
 		if (this.state.open) classes.push("open");
 		return (
