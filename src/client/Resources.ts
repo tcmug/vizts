@@ -2,7 +2,7 @@ import * as Konva from "konva";
 
 let resources: Object = {};
 
-export interface SpriteSpecs {
+export interface SpriteResourceSpecs {
 	image: string;
 	width: number;
 	height: number;
@@ -12,6 +12,12 @@ export interface SpriteSpecs {
 	animations: {};
 }
 
+export interface ImageResourceSpecs {
+	image: string;
+	width: number;
+	height: number;
+}
+
 export class Resource {
 	consctructor() {}
 	async load(): Promise<any> {
@@ -19,11 +25,11 @@ export class Resource {
 	}
 }
 
-export class Sprite extends Resource {
-	specs: SpriteSpecs;
+export class SpriteResource extends Resource {
+	specs: SpriteResourceSpecs;
 	konvaSprite: Konva.Sprite;
 
-	constructor(specs: SpriteSpecs) {
+	constructor(specs: SpriteResourceSpecs) {
 		super();
 		this.specs = specs;
 	}
@@ -46,6 +52,36 @@ export class Sprite extends Resource {
 				} as Konva.SpriteConfig);
 				this.konvaSprite.scaleX(3);
 				this.konvaSprite.scaleY(3);
+				resolve(img);
+			});
+			img.addEventListener("error", () => {
+				reject(new Error("Failed to load"));
+			});
+			img.src = this.specs.image;
+		});
+	}
+}
+
+export class ImageResource extends Resource {
+	specs: ImageResourceSpecs;
+	konvaImage: Konva.Image;
+
+	constructor(specs: ImageResourceSpecs) {
+		super();
+		this.specs = specs;
+	}
+
+	async load() {
+		return new Promise((resolve, reject) => {
+			let img = new Image();
+			img.addEventListener("load", e => {
+				this.konvaImage = new Konva.Image({
+					x: 0,
+					y: 0,
+					width: this.specs.width,
+					height: this.specs.height,
+					image: img
+				} as Konva.ImageConfig);
 				resolve(img);
 			});
 			img.addEventListener("error", () => {

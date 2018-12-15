@@ -12,7 +12,6 @@ export interface LayerProps {
 
 interface LayerState {
 	layer: any;
-	frame: Function;
 	children: any;
 	animation: any;
 }
@@ -22,7 +21,6 @@ export class Layer extends Component<LayerProps, LayerState> {
 		layer: null,
 		scene: null,
 		fps: 0,
-		frame: null,
 		children: [],
 		animation: null
 	} as LayerState;
@@ -31,9 +29,6 @@ export class Layer extends Component<LayerProps, LayerState> {
 
 	constructor(props: any) {
 		super(props);
-		this.setState({
-			frame: props.frame
-		});
 	}
 
 	refresh = () => {
@@ -53,6 +48,8 @@ export class Layer extends Component<LayerProps, LayerState> {
 				ctx.msImageSmoothingEnabled = false;
 			}
 		}
+
+		layer.draw();
 	};
 
 	getLayer = () => this.state.layer;
@@ -62,7 +59,7 @@ export class Layer extends Component<LayerProps, LayerState> {
 		this.props.scene.getStage().add(layer);
 		this.setState({ layer: layer });
 		this.state.layer.self = this;
-		if (this.state.frame) {
+		if (this.props.frame) {
 			this.play();
 		}
 		this.refresh();
@@ -90,8 +87,7 @@ export class Layer extends Component<LayerProps, LayerState> {
 				return false;
 			}
 			passed -= ms_per_frame;
-			self.state.frame(self.state.children, frame);
-
+			self.props.frame(self.state.children, frame);
 			return true;
 		}, this.state.layer);
 

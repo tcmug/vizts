@@ -4,7 +4,7 @@ import * as Konva from "konva";
 import { Point, PointList } from "../lib/Point";
 import { Layer } from "./Layer";
 import { Area } from "./Area";
-import { getResourceByName, Sprite } from "../Resources";
+import { getResourceByName, SpriteResource } from "../Resources";
 
 export enum HitBox {
 	Box,
@@ -41,7 +41,7 @@ export class Entity extends Component<EntityProps, EntityState> {
 		position: null,
 		group: null,
 		target: null,
-		speed: 1,
+		speed: 3,
 		hitAccuracy: HitBox.Box,
 		path: [],
 		drawnPath: null
@@ -58,7 +58,7 @@ export class Entity extends Component<EntityProps, EntityState> {
 			this.setState({
 				group: (getResourceByName(
 					props.sprite
-				) as Sprite).konvaSprite.clone()
+				) as SpriteResource).konvaSprite.clone()
 			});
 		}
 		_id = _id + 1;
@@ -130,10 +130,12 @@ export class Entity extends Component<EntityProps, EntityState> {
 		} else {
 			this.setState({ target: new Point(x, y) });
 		}
-		if (this.state.target.x > this.state.group.getX()) {
-			this.state.group.animation("walkRight");
-		} else {
-			this.state.group.animation("walkLeft");
+		if (this.state.target) {
+			if (this.state.target.x > this.state.group.getX()) {
+				this.state.group.animation("walkRight");
+			} else {
+				this.state.group.animation("walkLeft");
+			}
 		}
 	};
 
@@ -147,6 +149,10 @@ export class Entity extends Component<EntityProps, EntityState> {
 		this.state.group
 			.setX(this.state.position.x)
 			.setY(this.state.position.y);
+	}
+
+	getPosition(): Point {
+		return this.state.position;
 	}
 
 	pickUp(item: Entity) {
@@ -171,6 +177,10 @@ export class Entity extends Component<EntityProps, EntityState> {
 			drawnPath: path
 		});
 		this.props.layer.getLayer().add(this.state.drawnPath);
+	}
+
+	shouldComponentUpdate() {
+		return false;
 	}
 
 	update() {

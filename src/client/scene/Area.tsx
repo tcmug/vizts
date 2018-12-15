@@ -12,36 +12,23 @@ export interface EntityProps {
 }
 
 export interface EntityState {
-	points: PointList;
 	group: any;
 }
 
-let _id: number = 1;
-
 export class Area extends Component<EntityProps, EntityState> {
 	state = {
-		points: [],
 		group: null
 	} as EntityState;
 
-	constructor(props: any) {
-		super(props);
-		this.setState({
-			points: props.points
-		});
-		_id = _id + 1;
-	}
-
 	componentDidMount() {
+		const pts = this.props.points.reduce((r, e) => {
+			r.push(e.x, e.y);
+			return r;
+		}, []);
 		let rect = new Konva.Line({
-			points: this.state.points.reduce((r, e) => {
-				r.push(e.x, e.y);
-				return r;
-			}, []),
-			fill: "#00D2FF",
+			points: pts,
 			stroke: "black",
 			strokeWidth: 1,
-			opacity: 0.2,
 			closed: true
 		}) as any;
 		rect["self"] = this;
@@ -52,12 +39,12 @@ export class Area extends Component<EntityProps, EntityState> {
 	}
 
 	containsPoint(pt: Point) {
-		const poly = new Polygon(this.state.points);
+		const poly = new Polygon(this.props.points);
 		return poly.containsPoint(pt);
 	}
 
 	pathBetween(start: Point, end: Point) {
-		const poly = new Polygon(this.state.points);
+		const poly = new Polygon(this.props.points);
 		return shortestPathInPolygonList(start, end, [poly]);
 	}
 
@@ -69,6 +56,10 @@ export class Area extends Component<EntityProps, EntityState> {
 				ref: (ref: any) => this.props.push(ref)
 			});
 		});
+	}
+
+	shouldComponentUpdate() {
+		return false;
 	}
 
 	render(props: any) {

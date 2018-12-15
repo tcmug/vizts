@@ -43,16 +43,25 @@ export class Scene extends Component<SceneProps, SceneState> {
 
 		stage.on("click", e => {
 			const node = e.target as any;
+			const pointer = stage.getPointerPosition();
+			pointer.x += stage.offsetX();
+			pointer.y += stage.offsetY();
 			if (node.nodeType == "Stage") {
-				this.props.backgroundClick(stage.getPointerPosition());
+				this.props.backgroundClick(pointer);
 			} else {
-				this.props.entityClick(node.self, stage.getPointerPosition());
+				this.props.entityClick(node.self, pointer);
 			}
 		});
 
 		this.setState({
 			stage: stage
 		});
+
+		// setInterval(() => {
+		// 	if (this.state.stage.offsetX() < 1000)
+		// 		this.state.stage.offsetX(this.state.stage.offsetX() + 1);
+		// 	else this.state.stage.offsetX(0);
+		// }, 25);
 	}
 
 	renderChildren(props: any) {

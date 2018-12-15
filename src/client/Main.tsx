@@ -10,10 +10,17 @@ import AreaBuilder from "./components/AreaBuilder";
 import { Layer } from "./scene/Layer";
 import { Entity } from "./scene/Entity";
 import { Area } from "./scene/Area";
-import { Sprite, SpriteSpecs, setResourceSource } from "./Resources";
+import { Image } from "./scene/Image";
+import {
+	SpriteResource,
+	SpriteResourceSpecs,
+	ImageResource,
+	ImageResourceSpecs,
+	setResourceSource
+} from "./Resources";
 
 var resources = {
-	onti: new Sprite({
+	onti: new SpriteResource({
 		image: require("../../assets/onti.png"),
 		animations: {
 			walkRight: [0, 0, 8, 8, 8, 0, 8, 8, 16, 0, 8, 8, 24, 0, 8, 8],
@@ -25,8 +32,8 @@ var resources = {
 		offsetX: 4,
 		offsetY: 8,
 		fps: 2
-	} as SpriteSpecs),
-	player: new Sprite({
+	} as SpriteResourceSpecs),
+	player: new SpriteResource({
 		image: require("../../assets/dude.png"),
 		animations: {
 			walkRight: [0, 0, 8, 8, 8, 0, 8, 8, 16, 0, 8, 8, 24, 0, 8, 8],
@@ -38,7 +45,17 @@ var resources = {
 		offsetX: 4,
 		offsetY: 8,
 		fps: 2
-	} as SpriteSpecs)
+	} as SpriteResourceSpecs),
+	background: new ImageResource({
+		image: require("../../assets/background.png"),
+		animations: {
+			walkRight: [0, 0, 8, 8, 8, 0, 8, 8, 16, 0, 8, 8, 24, 0, 8, 8],
+			walkLeft: [0, 8, 8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 24, 8, 8, 8],
+			stand: [0, 16, 8, 8, 8, 16, 8, 8, 16, 16, 8, 8, 24, 16, 8, 8]
+		},
+		width: 1000,
+		height: 300
+	} as ImageResourceSpecs)
 };
 
 export enum MODE {
@@ -48,7 +65,7 @@ export enum MODE {
 
 interface MainProps {}
 interface MainState {
-	entities: any;
+	entities: VNode[];
 	items: any;
 	loading: boolean;
 	resources: Object;
@@ -76,12 +93,40 @@ function importComponent({ name, props }: { name: string; props: any }): any {
 
 export default class Main extends Component<MainProps, MainState> {
 	state = {
-		entities: new Array(),
-		items: new Array(),
+		entities: [
+			<Area
+				points={[
+					new Point(40, 40),
+					new Point(400, 40),
+					new Point(400, 100),
+					new Point(200, 100),
+					new Point(200, 200),
+					new Point(400, 200),
+
+					new Point(400, 300),
+					new Point(500, 300),
+					new Point(500, 200),
+					new Point(1400, 200),
+					new Point(1400, 350),
+					new Point(500, 350),
+					new Point(400, 350),
+
+					new Point(400, 400),
+					new Point(40, 400)
+				]}
+			>
+				<Entity
+					save={(e: Entity) => this.setState({ player: e })}
+					sprite="onti"
+					position={new Point(100, 120)}
+				/>
+			</Area>
+		],
+		items: [],
 		loading: true,
 		resources: {},
 		mode: MODE.ZERO,
-		editTools: new Array(),
+		editTools: [],
 		player: null
 	} as MainState;
 
@@ -96,7 +141,8 @@ export default class Main extends Component<MainProps, MainState> {
 	};
 
 	entClick = (entity: Entity, e: any) => {
-		this.state.player.walkTo(e.x, e.y);
+		if (this.state.editTools.length == 0)
+			this.state.player.walkTo(e.x, e.y);
 		// if (entity instanceof Entity) {
 		// 	if (this.state.player) {
 		// 		entity.containsPoint());
@@ -117,33 +163,33 @@ export default class Main extends Component<MainProps, MainState> {
 			? JSON.parse(save).map((e: any) => importComponent(e))
 			: [];
 		this.setState({
-			entities: ents
+			entities: [this.state.entities, ...ents]
 		});
 	};
 
 	addEntity = (event: Event) => {
-		this.setState({
-			entities: [
-				...this.state.entities,
-				<Entity
-					sprite="onti"
-					position={
-						new Point(Math.random() * 200, Math.random() * 200)
-					}
-				/>
-			]
-		});
+		// this.setState({
+		// 	entities: [
+		// 		...this.state.entities,
+		// 		<Entity
+		// 			sprite="onti"
+		// 			position={
+		// 				new Point(Math.random() * 200, Math.random() * 200)
+		// 			}
+		// 		/>
+		// 	]
+		// });
 	};
 
 	finishArea = ({ points }: { points: PointList }) => {
 		this.setState({
+			editTools: [],
 			entities: [...this.state.entities, <Area points={points} />]
 		});
 		const exp = this.state.entities.map((node: VNode) => {
 			return exportComponent(node);
 		});
 		localStorage.setItem("test", JSON.stringify(exp));
-		this.setState({ editTools: [] });
 	};
 
 	addArea = (event: Event) => {
@@ -155,13 +201,22 @@ export default class Main extends Component<MainProps, MainState> {
 		});
 	};
 
+	moveBg = (children: any, frame: any) => {
+		//onst pos = this.state.player.getPosition();
+		// children[0].setPosition(
+		// 	// new Point(
+		// 	// 	Math.sin(frame.lastTime / 500) * 20,
+		// 	// 	Math.cos(frame.lastTime / 500) * 20
+		// 	// )
+		// );
+	};
+
 	render() {
 		const { loading, entities, editTools } = this.state;
 		if (loading) {
 			return (
 				<Loader resources={resources} finished={this.finishedLoading} />
 			);
-			/* <Entity sprite="onti" position={new Point(200, 200)} /> */
 		}
 		return (
 			<div>
@@ -175,40 +230,19 @@ export default class Main extends Component<MainProps, MainState> {
 				>
 					<Layer
 						perfect={false}
-						fps={30}
+						smoothing={false}
+						fps={60}
+						frame={this.moveBg}
+					>
+						<Image image="background" position={new Point(0, 0)} />
+					</Layer>
+					<Layer
+						perfect={false}
+						fps={60}
 						frame={this.updateFrame}
 						smoothing={false}
 					>
 						{entities}
-						<Area
-							points={[
-								new Point(40, 40),
-								new Point(400, 40),
-								new Point(400, 100),
-								new Point(200, 100),
-								new Point(200, 200),
-								new Point(400, 200),
-
-								new Point(400, 300),
-								new Point(500, 300),
-								new Point(500, 200),
-								new Point(550, 200),
-								new Point(550, 350),
-								new Point(500, 350),
-								new Point(400, 350),
-
-								new Point(400, 400),
-								new Point(40, 400)
-							]}
-						>
-							<Entity
-								save={(e: Entity) =>
-									this.setState({ player: e })
-								}
-								sprite="onti"
-								position={new Point(100, 120)}
-							/>
-						</Area>
 					</Layer>
 					{editTools.length > 0 ? (
 						<Layer perfect={false}>{editTools}</Layer>

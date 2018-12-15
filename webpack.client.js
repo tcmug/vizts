@@ -33,10 +33,6 @@ const client = {
 				loader: ["ts-loader"]
 			},
 			{
-				test: require.resolve("snapsvg"),
-				loader: "imports-loader?this=>window,fix=>module.exports=0"
-			},
-			{
 				test: /\.sss$/,
 				loaders: ["style-loader", "css-loader", "postcss-loader"]
 			},

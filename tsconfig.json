@@ -16,6 +16,8 @@
 		"src/*/*.ts",
 		"src/*/*.tsx",
 		"src/client/scene/Line.tsx",
-		"src/client/components/ToolBar/index.tsx"
+		"src/client/components/ToolBar/index.tsx",
+		"src/client/scene/Image.tsx",
+		"src/client/scene/SetPiece.tsx"
 	]
 }

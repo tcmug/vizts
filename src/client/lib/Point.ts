@@ -44,6 +44,16 @@ export class Point {
 	toString() {
 		return `new Point(${this.x},${this.y})`;
 	}
+
+	clampX(min: number, max: number) {
+		if (this.x < min) this.x = min;
+		else if (this.x > max) this.x = max;
+	}
+
+	clampY(min: number, max: number) {
+		if (this.y < min) this.y = min;
+		else if (this.y > max) this.y = max;
+	}
 }
 
 export type PointList = Point[];
